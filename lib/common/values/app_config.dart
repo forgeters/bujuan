@@ -11,11 +11,10 @@ class AppConfig {
   static final List<BottomData> bottomItems = [
     BottomData(HugeIconsStroke.home01, HugeIconsSolid.home01, AppRouter.home, 'Home'),
     BottomData(HugeIconsStroke.lookTop, HugeIconsSolid.lookTop, AppRouter.user, 'Me'),
-    BottomData(HugeIconsStroke.fileMusic, HugeIconsSolid.fileMusic, AppRouter.setting, 'File'),
+    BottomData(HugeIconsStroke.searchCircle, HugeIconsSolid.searchCircle, AppRouter.setting, 'Search'),
     BottomData(HugeIconsStroke.settings02, HugeIconsSolid.settings02, AppRouter.setting, 'Setting'),
   ];
 
-  static HomeStyleType homeStyleType = HomeStyleType.bottomBar;
 
   static const String userInfoKey = 'USER_INFO_KEY';
 }

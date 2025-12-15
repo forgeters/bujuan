@@ -1,3 +1,4 @@
+import 'package:bujuan_music/common/bujuan_music_handler_mediakit.dart';
 import 'package:bujuan_music/pages/home/provider.dart';
 import 'package:bujuan_music/pages/main/phone/widgets.dart';
 import 'package:bujuan_music/widgets/items.dart';
@@ -11,6 +12,7 @@ class TodayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var dateTime = DateTime.now();
     return Scaffold(
       appBar: AppBar(
         title: Text('Recommended daily'),
@@ -20,9 +22,17 @@ class TodayPage extends StatelessWidget {
           final album = ref.watch(recommendSongsProvider);
           return album.when(
             data: (today) => ListView.builder(
+              itemExtent: 75,
               itemBuilder: (context, index) => index == today.length
                   ? DynamicPadding(hasBottom: false)
-                  : MediaItemWidget(mediaItem: today[index]),
+                  : MediaItemWidget(
+                      mediaItem: today[index],
+                      onTap: () {
+                        BujuanMusicHandler().updateQueue(today,
+                            index: index,
+                            queueName: 'Today-${dateTime.year}-${dateTime.month}-${dateTime.day}');
+                      },
+                    ),
               itemCount: today.length + 1,
             ),
             loading: () => const Center(child: LoadingIndicator()),

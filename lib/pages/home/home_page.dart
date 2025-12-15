@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:bujuan_music/common/bujuan_music_handler.dart';
 import 'package:bujuan_music/common/values/app_images.dart';
 import 'package:bujuan_music/pages/home/provider.dart';
 import 'package:bujuan_music/pages/main/phone/widgets.dart';
@@ -15,12 +14,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../common/bujuan_music_handler_mediakit.dart';
 import '../../utils/adaptive_screen_utils.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  //粒子
   @override
   Widget build(BuildContext context) {
     bool desktop = medium(context) || expanded(context);
@@ -55,126 +54,42 @@ class MobileHome extends StatelessWidget {
     final aristList = homeData.topArtistEntity.artists;
     final albumList = homeData.recommendResourceEntity.recommend;
     final songList = homeData.medias;
-    var of2 = MediaQuery.of(context);
     return CustomScrollView(
       slivers: [
         SliverPadding(padding: EdgeInsets.symmetric(vertical: 5.w)),
         SliverToBoxAdapter(
-            child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          child: GestureDetector(
-            child: Image.asset(AppImages.banner, width: 345.w, height: 148.w, fit: BoxFit.fill),
-            onTap: () => context.push(AppRouter.today),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15.w),
+            child: GestureDetector(
+              child: Image.asset(AppImages.banner, width: 345.w, height: 148.w, fit: BoxFit.fill),
+              onTap: () => context.push(AppRouter.today),
+            ),
           ),
-        )),
+        ),
         SliverToBoxAdapter(child: _buildTitle('Top Arist', onTap: () {})),
-        SliverToBoxAdapter(child: _buildAristList(aristList)),
+        SliverToBoxAdapter(child: ArtistListWidget(artists: aristList)),
         SliverToBoxAdapter(child: _buildTitle('Top Album', onTap: () {})),
-        SliverToBoxAdapter(child: _buildAlbumList(albumList)),
+        SliverToBoxAdapter(child: AlbumListWidget(albums: albumList)),
         SliverToBoxAdapter(child: _buildTitle('New Song', onTap: () {})),
         _buildSongList(songList),
-        SliverToBoxAdapter(
-          child: DynamicPadding(),
-        )
+        SliverToBoxAdapter(child: DynamicPadding()),
       ],
     );
   }
 
-  Widget _buildAlbumList(List<RecommendResourceRecommend> artists) {
-    return SizedBox(
-      height: 168.w,
-      child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 15.w),
-        scrollDirection: Axis.horizontal,
-        itemCount: artists.length,
-        separatorBuilder: (_, __) => SizedBox(width: 15.w),
-        itemBuilder: (context, index) {
-          final album = artists[index];
-          return GestureDetector(
-            child: SizedBox(
-              width: 138.w,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CachedImage(
-                    imageUrl: album.picUrl ?? '',
-                    width: 138.w,
-                    height: 138.w,
-                    pHeight: 300,
-                    pWidth: 300,
-                    fit: BoxFit.cover,
-                    borderRadius: 16.w,
-                  ),
-                  SizedBox(height: 3.w),
-                  Text(
-                    '  ${album.name}',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            onTap: () {
-              context.push(AppRouter.playlist, extra: artists[index].id);
-            },
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAristList(List<TopArtistArtists> artists) {
-    return SizedBox(
-      height: 118.w,
-      child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 15.w),
-        scrollDirection: Axis.horizontal,
-        itemCount: artists.length,
-        separatorBuilder: (_, __) => SizedBox(width: 15.w),
-        itemBuilder: (context, index) {
-          final album = artists[index];
-          return GestureDetector(
-            child: SizedBox(
-              width: 88.w,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CachedImage(
-                    imageUrl: album.picUrl ?? '',
-                    width: 88.w,
-                    height: 88.w,
-                    pHeight: 200,
-                    pWidth: 200,
-                    fit: BoxFit.cover,
-                    borderRadius: 44.w,
-                  ),
-                  SizedBox(height: 3.w),
-                  Text(
-                    '  ${album.name}',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            onTap: () {
-              context.push(AppRouter.playlist, extra: artists[index].id);
-            },
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildSongList(List<MediaItem> songs) {
-    return SliverList.builder(
-      itemCount: songs.length > 20 ? 20 : songs.length,
+    DateTime dateTime = DateTime.now();
+    return SliverFixedExtentList.builder(
       itemBuilder: (context, index) => MediaItemWidget(
         mediaItem: songs[index],
-        onTap: () => BujuanMusicHandler().updateQueue(songs, index: index),
+        onTap: () => BujuanMusicHandler().updateQueue(
+          songs,
+          index: index,
+          queueName: 'NewSong-${dateTime.year}-${dateTime.month}-${dateTime.day}',
+        ),
       ),
+      itemExtent: 75,
+      itemCount: songs.length,
     );
   }
 
@@ -183,7 +98,10 @@ class MobileHome extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 20.w),
       child: Row(
         children: [
-          Text(title, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          ),
           const Spacer(),
           if (onTap != null)
             GestureDetector(
@@ -193,13 +111,70 @@ class MobileHome extends StatelessWidget {
                   Text(
                     'See all',
                     style: TextStyle(
-                        fontSize: 14.sp, color: Color(0XFF1ED760), fontWeight: FontWeight.bold),
+                      fontSize: 14.sp,
+                      color: Color(0XFF1ED760),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Icon(Icons.keyboard_arrow_right_outlined, size: 20.sp, color: Color(0XFF1ED760)),
                 ],
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class AlbumListWidget extends StatelessWidget {
+  final List<RecommendResourceRecommend> albums;
+
+  const AlbumListWidget({super.key, required this.albums});
+
+  @override
+  Widget build(BuildContext context) {
+    var itemCount = albums.length > 6 ? 6 : albums.length;
+    return RepaintBoundary(
+      child: SizedBox(
+        height: 168.w,
+        child: ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          scrollDirection: Axis.horizontal,
+          itemCount: itemCount,
+          itemExtent: 138.w,
+          itemBuilder: (context, index) {
+            final album = albums[index];
+            return AlbumItem(
+              album: album,
+              onTap: () => context.push(AppRouter.playlist, extra: album.id),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class ArtistListWidget extends StatelessWidget {
+  final List<TopArtistArtists> artists;
+
+  const ArtistListWidget({super.key, required this.artists});
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: SizedBox(
+        height: 118.w,
+        child: ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          scrollDirection: Axis.horizontal,
+          itemExtent: 103.w,
+          itemCount: artists.length,
+          itemBuilder: (context, index) {
+            final album = artists[index];
+            return ArtistItem(album: album, onTap: () {});
+          },
+        ),
       ),
     );
   }
@@ -234,8 +209,9 @@ class DesktopHome extends StatelessWidget {
                   width: 155.w,
                   padding: EdgeInsets.all(5.w),
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.white.withAlpha(60)),
-                      borderRadius: BorderRadius.circular(20.w)),
+                    border: Border.all(color: Colors.white.withAlpha(60)),
+                    borderRadius: BorderRadius.circular(20.w),
+                  ),
                   child: Column(
                     children: [
                       CachedImage(
@@ -278,7 +254,7 @@ class DesktopHome extends StatelessWidget {
                   child: Column(
                     children: [
                       CachedImage(
-                        imageUrl: medias[index].artUri.toString() ?? '',
+                        imageUrl: medias[index].artUri.toString(),
                         width: 80.w,
                         height: 80.w,
                         borderRadius: 40.w,

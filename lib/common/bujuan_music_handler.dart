@@ -1,222 +1,211 @@
-import 'dart:async';
-
-import 'package:audio_service/audio_service.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:bujuan_music_api/api/song/entity/song_url_entity.dart';
-import 'package:bujuan_music_api/common/music_api.dart';
-
-enum LoopMode {
-  one, // 单曲循环
-  playlist, // 顺序循环整个播放列表
-  shuffle, // 随机循环播放
-}
-
-class BujuanMusicHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
-  // 私有构造函数
-  BujuanMusicHandler._internal() {
-    // 播放器状态同步到 audio_service
-    _player.onPlayerStateChanged.listen((state) {
-      playbackState.add(playbackState.value.copyWith(
-        playing: state == PlayerState.playing,
-        processingState: AudioProcessingState.ready,
-        controls: [
-          MediaControl.skipToPrevious,
-          if (state == PlayerState.playing) MediaControl.pause else MediaControl.play,
-          MediaControl.skipToNext,
-          MediaControl.stop,
-        ],
-        systemActions: const {
-          MediaAction.seek,
-        },
-        androidCompactActionIndices: const [1, 2, 3],
-      ));
-    });
-    _player.onPositionChanged.listen((position) {
-      playbackState.add(playbackState.value.copyWith(updatePosition: position));
-    });
-    // 播放完成自动下一首
-    _player.onPlayerComplete.listen((_) => _handlePlaybackCompleted());
-  }
-
-  static final BujuanMusicHandler _instance = BujuanMusicHandler._internal();
-
-  factory BujuanMusicHandler() => _instance;
-
-  final AudioPlayer _player = AudioPlayer();
-  final List<MediaItem> _playlist = [];
-  final List<int> _shuffledIndices = [];
-
-  int _currentIndex = 0;
-  int _shufflePosition = 0;
-  LoopMode _loopMode = LoopMode.playlist;
-
-  LoopMode get loopMode => _loopMode;
-
-  Stream<Duration> get currentPosition => _player.onPositionChanged;
-
-  /// 更新播放列表
-  @override
-  Future<void> updateQueue(List<MediaItem> queue, {int index = 0}) async {
-    if (queue.isEmpty) return;
-
-    await _player.stop();
-
-    _playlist
-      ..clear()
-      ..addAll(queue);
-    _currentIndex = index;
-
-    if (_loopMode == LoopMode.shuffle) {
-      _generateShuffledIndices();
-    }
-
-    this.queue.add(_playlist);
-    mediaItem.add(_playlist[_currentIndex]);
-    await play();
-  }
-
-  /// 生成打乱的播放顺序
-  void _generateShuffledIndices() {
-    _shuffledIndices
-      ..clear()
-      ..addAll(List.generate(_playlist.length, (i) => i)..shuffle());
-
-    _shufflePosition = _shuffledIndices.indexOf(_currentIndex);
-  }
-
-  /// 设置循环模式
-  void setLoopMode(LoopMode mode) {
-    _loopMode = mode;
-    if (mode == LoopMode.shuffle) {
-      _generateShuffledIndices();
-    }
-  }
-
-  /// 获取播放地址
-  Future<String> _fetchPlayUrl(String id) async {
-    SongUrlEntity? songUrlEntity = await BujuanMusicManager().songUrl(ids: [id]);
-    if (songUrlEntity != null && (songUrlEntity.data ?? []).isNotEmpty) {
-      return songUrlEntity.data!.first.url ?? '';
-    }
-    return '';
-  }
-
-  /// 播放当前歌曲
-  Future<void> _playCurrent() async {
-    final item = _playlist[_currentIndex];
-    mediaItem.add(item);
-    var url = await _fetchPlayUrl(item.id);
-    // print('object----$url');
-    var split = url.split('?');
-    if (split.length > 1) {
-      url = split[0];
-    }
-    await _player.play(UrlSource(url));
-  }
-
-  /// 播放
-  @override
-  Future<void> play() async {
-    await _playCurrent();
-  }
-
-  @override
-  Future<void> seek(Duration position) async {
-    playbackState.add(playbackState.value.copyWith(updatePosition: position));
-    await _player.seek(position);
-  }
-
-  /// 暂停
-  @override
-  Future<void> pause() async {
-    await _player.pause();
-  }
-
-  /// 停止
-  @override
-  Future<void> stop() async {
-    await _player.stop();
-  }
-
-  /// 播放 / 暂停切换
-  Future<void> playOrPause() async {
-    if (_player.state == PlayerState.playing) {
-      await pause();
-    } else {
-      await _player.resume();
-    }
-  }
-
-  /// 下一首
-  @override
-  Future<void> skipToNext() async {
-    switch (_loopMode) {
-      case LoopMode.one:
-      case LoopMode.playlist:
-        _currentIndex = (_currentIndex + 1) % _playlist.length;
-        await _playCurrent();
-        break;
-
-      case LoopMode.shuffle:
-        if (_shuffledIndices.isEmpty) _generateShuffledIndices();
-
-        _shufflePosition++;
-        if (_shufflePosition >= _shuffledIndices.length) {
-          _generateShuffledIndices();
-        }
-        _currentIndex = _shuffledIndices[_shufflePosition % _shuffledIndices.length];
-        await _playCurrent();
-        break;
-    }
-  }
-
-  /// 上一首
-  @override
-  Future<void> skipToPrevious() async {
-    switch (_loopMode) {
-      case LoopMode.one:
-      case LoopMode.playlist:
-        if (_currentIndex > 0) {
-          _currentIndex--;
-        } else {
-          _currentIndex = _playlist.length - 1;
-        }
-        await _playCurrent();
-        break;
-
-      case LoopMode.shuffle:
-        if (_shuffledIndices.isEmpty) _generateShuffledIndices();
-
-        _shufflePosition--;
-        if (_shufflePosition < 0) {
-          _shufflePosition = _shuffledIndices.length - 1;
-        }
-        _currentIndex = _shuffledIndices[_shufflePosition];
-        await _playCurrent();
-        break;
-    }
-  }
-
-  /// 播放完成时的逻辑
-  Future<void> _handlePlaybackCompleted() async {
-    switch (_loopMode) {
-      case LoopMode.one:
-        await _playCurrent();
-        break;
-
-      case LoopMode.playlist:
-        _currentIndex = (_currentIndex + 1) % _playlist.length;
-        await _playCurrent();
-        break;
-
-      case LoopMode.shuffle:
-        _shufflePosition++;
-        if (_shufflePosition >= _shuffledIndices.length) {
-          _generateShuffledIndices();
-        }
-        _currentIndex = _shuffledIndices[_shufflePosition % _shuffledIndices.length];
-        await _playCurrent();
-        break;
-    }
-  }
-}
+// import 'dart:async';
+//
+// import 'package:audio_service/audio_service.dart';
+// import 'package:audio_session/audio_session.dart';
+// import 'package:bujuan_music/common/local_proxy_service.dart';
+// import 'package:just_audio/just_audio.dart';
+//
+// class BujuanMusicHandler extends BaseAudioHandler with QueueHandler, SeekHandler {
+//   // 私有构造函数
+//   BujuanMusicHandler._internal() {
+//     // 播放器状态同步到 audio_service
+//     _audioPlayer.playerStateStream.listen((PlayerState state) {
+//       print('playerStateStream-------${state.toString()}');
+//       var playing = state.playing;
+//       playbackState.add(
+//         playbackState.value.copyWith(
+//           playing: playing,
+//           processingState: const {
+//             ProcessingState.idle: AudioProcessingState.idle,
+//             ProcessingState.loading: AudioProcessingState.loading,
+//             ProcessingState.buffering: AudioProcessingState.buffering,
+//             ProcessingState.ready: AudioProcessingState.ready,
+//             ProcessingState.completed: AudioProcessingState.completed,
+//           }[state.processingState]!,
+//           systemActions: const {MediaAction.seek},
+//           androidCompactActionIndices: const [1, 2, 3],
+//           controls: [
+//             MediaControl.skipToPrevious,
+//             playing ? MediaControl.pause : MediaControl.play,
+//             MediaControl.skipToNext,
+//             MediaControl.stop,
+//           ],
+//           repeatMode: AudioServiceRepeatMode.all,
+//           shuffleMode: AudioServiceShuffleMode.none,
+//         ),
+//       );
+//     });
+//     _audioPlayer.currentIndexStream.listen((index) {
+//       playbackState.add(playbackState.value.copyWith(queueIndex: index));
+//       if (queue.value.isNotEmpty && index != null) {
+//         mediaItem.add(queue.value[index]);
+//       }
+//     });
+//
+//     _audioPlayer.createPositionStream().listen((pp) {
+//       print('object12333=============$pp');
+//     });
+//
+//     _audioPlayer.errorStream.listen((e) {
+//       print('error=============${e.message}');
+//     });
+//
+//     _audioPlayer.positionStream.listen((position) {
+//       print('positionStream=============${position}');
+//       playbackState.add(playbackState.value.copyWith(updatePosition: position));
+//     });
+//
+//     _audioPlayer.bufferedPositionStream.listen((buffered) {
+//       print('bufferedPositionStream=============${buffered}');
+//       playbackState.add(playbackState.value.copyWith(bufferedPosition: buffered));
+//     });
+//
+//     _audioPlayer.loopModeStream.listen((loopMode) {
+//       playbackState.add(
+//         playbackState.value.copyWith(
+//           repeatMode: const {
+//             LoopMode.all: AudioServiceRepeatMode.all,
+//             LoopMode.off: AudioServiceRepeatMode.none,
+//             LoopMode.one: AudioServiceRepeatMode.one,
+//           }[loopMode]!,
+//         ),
+//       );
+//     });
+//
+//     _audioPlayer.shuffleModeEnabledStream.listen((enable) {
+//       playbackState.add(
+//         playbackState.value.copyWith(
+//           shuffleMode: enable ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
+//         ),
+//       );
+//     });
+//     _audioPlayer.setShuffleModeEnabled(false);
+//     _audioPlayer.setLoopMode(LoopMode.all);
+//   }
+//
+//   static final BujuanMusicHandler _instance = BujuanMusicHandler._internal();
+//
+//   factory BujuanMusicHandler() => _instance;
+//
+//   final AudioPlayer _audioPlayer = AudioPlayer();
+//
+//   init() async {
+//     AudioSession session = await AudioSession.instance;
+//     session.configure(const AudioSessionConfiguration.speech());
+//   }
+//
+//   /// 更新播放列表
+//   @override
+//   Future<void> updateQueue(
+//     List<MediaItem> songs, {
+//     int index = 0,
+//     String queueName = '',
+//     bool save = true,
+//     Duration? position,
+//   }) async {
+//     if (songs.isEmpty) return;
+//     var playlist = <ProgressiveAudioSource>[];
+//     if (queueTitle.value == queueName) {
+//       print('object-----------1');
+//       _audioPlayer.seek(Duration.zero, index: index);
+//     } else {
+//       print('object-----------2');
+//       queueTitle.value = queueName;
+//       queue.add(songs);
+//       for (var song in songs) {
+//         playlist.add(
+//           ProgressiveAudioSource(Uri.parse(LocalProxyService().proxyUrl(song.id)), tag: song.id),
+//         );
+//       }
+//       await _audioPlayer.setAudioSources(
+//         playlist,
+//         initialIndex: index,
+//         initialPosition: position,
+//         preload: false,
+//       );
+//     }
+//     play();
+//   }
+//
+//   /// 播放
+//   @override
+//   Future<void> play() async {
+//     await _audioPlayer.play();
+//   }
+//
+//   @override
+//   Future<void> seek(Duration position) async {
+//     await _audioPlayer.seek(position);
+//   }
+//
+//   /// 暂停
+//   @override
+//   Future<void> pause() async {
+//     await _audioPlayer.pause();
+//   }
+//
+//   /// 停止
+//   @override
+//   Future<void> stop() async {
+//     await _audioPlayer.stop();
+//   }
+//
+//   /// 播放 / 暂停切换
+//   Future<void> toggle() async {
+//     _audioPlayer.playing ? pause() : play();
+//   }
+//
+//   /// 下一首
+//   @override
+//   Future<void> skipToNext() async {
+//     await _audioPlayer.seekToNext();
+//   }
+//
+//   /// 上一首
+//   @override
+//   Future<void> skipToPrevious() async {
+//     await _audioPlayer.seekToPrevious();
+//   }
+//
+//   /// 切换循环/随机模式（按你原来的逻辑改造，保证 shuffle 生效）
+//   Future<void> changeLoopMode() async {
+//     if (_audioPlayer.shuffleModeEnabled) {
+//       // 如果当前是 shuffle -> 关闭 shuffle，设为 all 循环
+//       await setShuffleEnabled(false);
+//       await _audioPlayer.setLoopMode(LoopMode.all);
+//     } else {
+//       // 非 shuffle 情况下，按顺序切换 loopMode -> one -> shuffle
+//       if (_audioPlayer.loopMode == LoopMode.all) {
+//         await _audioPlayer.setLoopMode(LoopMode.one);
+//       } else if (_audioPlayer.loopMode == LoopMode.one) {
+//         // 开启 shuffle
+//         await setShuffleEnabled(true);
+//         await _audioPlayer.setLoopMode(LoopMode.all);
+//       } else {
+//         // default -> set loop all
+//         await _audioPlayer.setLoopMode(LoopMode.all);
+//       }
+//     }
+//   }
+//
+//   /// 显式设置 shuffle 开关（如果你有独立按钮）
+//   Future<void> setShuffleEnabled(bool enabled) async {
+//     await _audioPlayer.setShuffleModeEnabled(enabled);
+//     if (enabled) {
+//       // 必须调用 shuffle() 生成随机播放列表
+//       await _audioPlayer.shuffle();
+//     }
+//   }
+//
+//   /// 清理资源（如果需要）
+//   Future<void> dispose() async {
+//     await _audioPlayer.dispose();
+//   }
+//
+//   @override
+//   Future<void> onTaskRemoved() {
+//     dispose();
+//     print('任务被移除');
+//     return super.onTaskRemoved();
+//   }
+// }

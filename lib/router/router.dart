@@ -37,8 +37,6 @@ GoRouter router(Ref ref) {
     final currentPath = router.state.path ?? '';
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(currentRouterPathProvider.notifier).updatePanelDetail(currentPath);
-      var homeStyle = ref.read(homeStyleProvider);
-      if (homeStyle == HomeStyleType.draw) return;
       if (currentPath != AppRouter.home &&
           currentPath != AppRouter.user &&
           currentPath != AppRouter.setting) {

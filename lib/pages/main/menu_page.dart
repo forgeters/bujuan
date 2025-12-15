@@ -2,8 +2,6 @@ import 'package:bujuan_music/pages/main/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
-import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
 
@@ -44,7 +42,6 @@ class MobileMenu extends ConsumerWidget {
           ),
           onTap: () {
             context.replace(AppRouter.home);
-            GetIt.I<ZoomDrawerController>().toggle?.call();
           },
         ),
         ListTile(
@@ -58,7 +55,6 @@ class MobileMenu extends ConsumerWidget {
           ),
           onTap: () {
             context.replace(AppRouter.user);
-            GetIt.I<ZoomDrawerController>().toggle?.call();
           },
         ),
         ListTile(
@@ -74,7 +70,6 @@ class MobileMenu extends ConsumerWidget {
           ),
           onTap: () {
             context.replace(AppRouter.setting);
-            GetIt.I<ZoomDrawerController>().toggle?.call();
           },
         ),
         ListTile(

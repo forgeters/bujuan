@@ -34,33 +34,36 @@ class BackdropView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    if (!blur) {
+      return _buildContent(theme);
+    }
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(0.w),
-      child: blur
-          ? BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), //
-              child: _buildContent(theme),
-            )
-          : _buildContent(theme),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), //
+        child: _buildContent(theme),
+      ),
     );
   }
 
-  Widget _buildContent(theme) {
-    return AnimatedContainer(
+  Widget _buildContent(ThemeData theme) {
+    return Container(
       width: width,
       height: height,
       padding: padding,
       margin: margin,
-      decoration: decoration ??
+      decoration:
+          decoration ??
           BoxDecoration(
             gradient: gradient,
-            color: gradient != null ? null : color ?? theme.scaffoldBackgroundColor.withAlpha(220),
+            color: gradient != null
+                ? null
+                : color ?? (theme.scaffoldBackgroundColor.withAlpha(blur?140:255)),
             // 半透明背景
             borderRadius: borderRadius ?? BorderRadius.circular(30.w),
-            border: border ?? Border.all(color: Colors.grey.withAlpha(20)),
+            border: border ?? Border.all(color: Color(0XFF1ED760).withAlpha(10), width: 1.2.w),
           ),
-      duration: Duration(milliseconds: 300),
-      child: child,
+      child: RepaintBoundary(child: child),
     );
   }
 }

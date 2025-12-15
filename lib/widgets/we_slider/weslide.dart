@@ -1,159 +1,121 @@
-import 'dart:ui';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'weslide_controller.dart';
 
-/// A backdrop widget that displaying contextual and actionable content. =]
+/// 一个可在主体内容上方滑出的面板容器组件
 // ignore: must_be_immutable
 class WeSlide extends StatefulWidget {
-  /// This is the widget that will be below as a footer,
-  /// this can be used as a [BottomNavigationBar]
+  /// 底部区域（如 `BottomNavigationBar`）
   final Widget? footer;
 
-  /// This is the widget that will be on top as a AppBar,
-  /// this can be used as a [AppBar]
+  /// 顶部区域（如 `AppBar`）
   final Widget? appBar;
 
-  /// This is the widget that will be hided with [Panel].
-  /// You can fit any widget. This parameter is required
+  /// 主体内容（被面板覆盖的部分）
   final Widget body;
 
-  /// This is the widget that will slide over the [Body].
-  /// You can fit any widget.
+  /// 面板内容（滑动到主体内容之上）
   final Widget? panel;
 
-  /// This is the header that will be over the [Panel].
-  /// You can fit any widget.
-  final Widget ? panelHeader;
+  /// Builds a scrollable panel and provides a [ScrollController]
+  /// and current panel position (0.0~1.0). If both [panel] and
+  /// [panelBuilder] are provided, [panelBuilder] takes precedence.
+  final Widget Function(ScrollController controller, double panelPosition)? panelBuilder;
 
-  /// This is the initial value that set the panel min height.
-  /// If the value is greater than 0, panel will be this size over [body]
-  /// By default is [150.0]. Set [0.0] if you want to hide [Panel]
+  /// 面板头部（位于面板内容之上）
+  final Widget? panelHeader;
+
+  /// 面板最小高度（收起时露出的高度），默认 150.0；设为 0 可完全隐藏
   final double panelMinSize;
 
-  /// This is the value that set the panel max height.
-  /// When slide up the panel this value define the max height
-  /// that panel will be over [Body]. By default is [400.0]
-  /// if you want that panel cover the whole [Body], set with
-  /// MediaQuery.of(context).size.height
+  /// 面板最大高度（完全展开的高度），默认 400.0；要覆盖全屏可设为屏幕高度
   final double panelMaxSize;
 
-  /// This is the value that set the panel width
-  /// by default is MediaQuery.of(context).size.width
+  /// 面板宽度，默认等于屏幕宽度
   final double? panelWidth;
 
-  /// Set this value to create a border radius over Panel.
-  /// When panelBorderRadiusBegin is diffrent from panelBorderRadiusEnd
-  /// and the panel is slide up, this create an animation border over panel
-  /// By default is 0.0
+  /// 面板圆角起始值（用于面板滑动过程的圆角动画），默认 0.0
   final double panelBorderRadiusBegin;
 
-  /// Set this value to create a border radius over Panel.
-  /// When panelBorderRadiusBegin is diffrent from panelBorderRadiusEnd
-  /// and the panel is slide up, this create an animation border over panel
-  /// By default is 0.0
+  /// 面板圆角结束值（用于面板滑动过程的圆角动画），默认 0.0
   final double panelBorderRadiusEnd;
 
-  /// Set this value to create a border radius over Body.
-  /// When bodyBorderRadiusBegin is diffrent from bodyBorderRadiusEnd
-  /// and the panel is slide up, this create an animation border over body
-  /// By default is 0.0
+  /// 主体圆角起始值（用于面板滑动过程对主体的圆角动画），默认 0.0
   final double bodyBorderRadiusBegin;
 
-  /// Set this value to create a border radius over Body.
-  /// When bodyBorderRadiusBegin is diffrent from bodyBorderRadiusEnd
-  /// and the panel is slide up, this create an animation border over body.
-  /// By default is 0.0
+  /// 主体圆角结束值（用于面板滑动过程对主体的圆角动画），默认 0.0
   final double bodyBorderRadiusEnd;
 
-  /// This is the value that set the body width.
-  /// By default is MediaQuery.of(context).size.width
+  /// 主体宽度，默认等于屏幕宽度
   final double? bodyWidth;
 
-  /// Set this value to create a parallax effect when the panel is slide up.
-  /// By default is 0.1
+  /// 面板滑动时的视差偏移系数，默认 0.1
   final double parallaxOffset;
 
-  /// This is the value that set the footer height.
-  /// by default is 60.0
+  /// 底部区域高度，默认 60.0
   final double footerHeight;
 
-  /// This is the value that set the appbar height.
-  /// by default is 80.0
+  /// 顶部区域高度，默认 80.0
   final double appBarHeight;
 
-  /// This is the value that defines opacity
-  /// overlay effect bethen body and panel.
+  /// 面板与主体之间的遮罩不透明度
   final double overlayOpacity;
 
-  /// This is the value that creates an image filter
-  /// that applies a Gaussian blur.
+  /// 高斯模糊强度
   final double blurSigma;
 
-  /// This is the value that defines Transform scale begin effect
-  /// By default is 1.0
+  /// 主体缩放起始值，默认 1.0
   final double transformScaleBegin;
 
-  /// This is the value that defines Transform scale end effect
-  /// by default is 0.9
+  /// 主体缩放结束值，默认 0.85
   final double transformScaleEnd;
 
-  /// This is the value that defines overlay color effect.
-  /// By default is Colors.black
+  /// 遮罩颜色，默认 `Colors.black`
   final Color overlayColor;
 
-  /// This is the value that defines blur color effect.
-  /// By default is Colors.black
+  /// 模糊颜色，默认 `Colors.black`
   final Color blurColor;
 
-  /// This is the value that defines background color.
-  /// By default is Colors.black end should be the same as [body]
+  /// 背景颜色，默认 `Colors.black`，建议与主体一致
   final Color backgroundColor;
 
-  /// This is the value that defines if you want to hide the footer.
-  /// By default is true
+  /// 是否隐藏底部区域，默认 `true`
   final bool hideFooter;
 
-  /// This is the value that defines if you want to hide the [panelHeader].
-  /// By default is true
+  /// 是否隐藏面板头部，默认 `true`
   final bool hidePanelHeader;
 
-  /// This is the value that defines if you want to enable paralax effect.
-  /// By default is false
+  /// 是否开启视差效果，默认 `false`
   final bool parallax;
 
-  /// This is the value that defines if you want
-  /// to enable transform scale effect. By default is false
+  /// 是否开启主体缩放效果，默认 `false`
   final bool transformScale;
 
-
-
-  /// This is the value that defines if you want
-  /// to enable Gaussian blur effect. By default is false
+  /// 是否隐藏顶部区域（例如 AppBar），默认 `true`
   final bool hideAppBar;
 
-  /// The [isDismissible] parameter specifies whether the panel
-  /// will be dismissed when user taps on the screen.
+  /// 面板打开时，点击遮罩是否关闭面板
   final bool isDismissible;
 
-  /// This is the value that need up sliding panel if you want
-  /// to enable Slide up through panel. By default is true
+  /// 是否允许通过面板本身上滑打开，默认 `true`
   final bool isUpSlide;
 
-  /// This is the value that create a fade transition over panel header
+  /// 面板头部淡入淡出序列
   final List<TweenSequenceItem<double>> fadeSequence;
 
-  /// This is the value that sets the duration of the animation.
-  /// By default is 300 milliseconds
+  /// 动画时长，默认 300ms
   final Duration animateDuration;
 
-  /// This object used to control animations, using methods like hide or show
-  /// to display panel or check if is visible with variable [isOpened]
+  /// 面板控制器：打开/关闭/状态监听等
   WeSlideController? controller;
 
-  /// This object used to control additional animation  for footer
+  /// 底部区域的附加控制器
   WeSlideController? footerController;
+
+  /// 拖拽响应灵敏度（数值越大越跟手）
+  final double dragSensitivity;
 
   /// WeSlide Constructor
   WeSlide({
@@ -162,6 +124,7 @@ class WeSlide extends StatefulWidget {
     this.appBar,
     required this.body,
     this.panel,
+    this.panelBuilder,
     this.panelHeader,
     this.panelMinSize = 150.0,
     this.panelMaxSize = 400.0,
@@ -192,17 +155,20 @@ class WeSlide extends StatefulWidget {
     this.animateDuration = const Duration(milliseconds: 300),
     this.controller,
     this.footerController,
-  })  : /*assert(body != null, 'body could not be null'),*/
-        assert(panelMinSize >= 0.0, 'panelMinSize cannot be negative'),
-        assert(footerHeight >= 0.0, 'footerHeight cannot be negative'),
-        assert(appBarHeight >= 0.0, 'appBarHeight cannot be negative'),
-        assert(panel != null, 'panel could not be null'),
-        assert(panelMaxSize >= panelMinSize, 'panelMaxSize cannot be less than panelMinSize'),
-        fadeSequence = fadeSequence ??
-            [
-              TweenSequenceItem<double>(weight: 1.0, tween: Tween(begin: 1, end: 0)),
-              TweenSequenceItem<double>(weight: 8.0, tween: Tween(begin: 0, end: 0)),
-            ] {
+    this.dragSensitivity = 2.0,
+  }) : /*assert(body != null, 'body could not be null'),*/
+       assert(panelMinSize >= 0.0, 'panelMinSize cannot be negative'),
+       assert(footerHeight >= 0.0, 'footerHeight cannot be negative'),
+       assert(appBarHeight >= 0.0, 'appBarHeight cannot be negative'),
+       assert(panel != null || panelBuilder != null, 'panel could not be null'),
+       assert(panelMaxSize >= panelMinSize, 'panelMaxSize cannot be less than panelMinSize'),
+       fadeSequence =
+           fadeSequence ??
+           [
+             TweenSequenceItem<double>(weight: 1.0, tween: Tween(begin: 1, end: 0)),
+             TweenSequenceItem<double>(weight: 8.0, tween: Tween(begin: 0, end: 0)),
+           ] {
+    assert(dragSensitivity > 0, 'dragSensitivity must be greater than zero');
     if (controller == null) {
       // ignore: unnecessary_this
       this.controller = WeSlideController();
@@ -224,8 +190,6 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
   // Panel Border Radius Effect[Tween]
   late Animation<double> _panelBorderRadius;
 
-  // Body Border Radius Effect [Tween]
-  late Animation<double> _bodyBorderRadius;
 
   // Scale Animation Effect [Tween]
   late Animation<double> _scaleAnimation;
@@ -236,6 +200,15 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
 
   // Footer Animation Controller
   late AnimationController _acFooter;
+
+  // Scroll controller for scrollable panel when using [panelBuilder]
+  ScrollController? _panelScrollController;
+  bool _shouldCapturePanelDrag = true; // only capture when inner list at top
+  bool _activeIntercept = false; // if current gesture is handled by panel
+  late Listenable _mergedAnimations;
+  bool _closingInProgress = false;
+  final List<double> _dySamples = <double>[];
+  final List<Duration> _timeSamples = <Duration>[];
 
   // Get current controller
   WeSlideController get _effectiveController => widget.controller!;
@@ -260,31 +233,38 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     _effectiveFooterController.addListener(_animatedFooter);
     // Animation controller;
     _ac = AnimationController(
-        vsync: this,
-        duration: widget.animateDuration,
-        value: _effectiveController.isOpened ? 1 : 0);
+      vsync: this,
+      duration: widget.animateDuration,
+      value: _effectiveController.isOpened ? 1 : 0,
+    );
     _acFooter = AnimationController(
-        vsync: this,
-        duration: widget.animateDuration,
-        value: _effectiveFooterController.isOpened ? 1 : 0); // show by default
+      vsync: this,
+      duration: widget.animateDuration,
+      value: _effectiveFooterController.isOpened ? 1 : 0,
+    ); // show by default
     // panel Border radius animation
 
-    _panelBorderRadius =
-        Tween<double>(begin: widget.panelBorderRadiusBegin, end: widget.panelBorderRadiusEnd)
-            .animate(_ac);
+    _panelBorderRadius = Tween<double>(
+      begin: widget.panelBorderRadiusBegin,
+      end: widget.panelBorderRadiusEnd,
+    ).animate(_ac);
     // body border radius animation
 
-    _bodyBorderRadius =
-        Tween<double>(begin: widget.bodyBorderRadiusBegin, end: widget.bodyBorderRadiusEnd)
-            .animate(_ac);
-    // Transform scale animation
 
-    _scaleAnimation =
-        Tween<double>(begin: widget.transformScaleBegin, end: widget.transformScaleEnd)
-            .animate(_ac);
+    _scaleAnimation = Tween<double>(
+      begin: widget.transformScaleBegin,
+      end: widget.transformScaleEnd,
+    ).animate(_ac);
     // Fade Animation sequence
     _fadeAnimation = TweenSequence(widget.fadeSequence).animate(_ac);
     _fadeAnimation1 = TweenSequence(panelFadeSequence).animate(_ac);
+
+    if (widget.panelBuilder != null) {
+      _panelScrollController = ScrollController();
+      _panelScrollController!.addListener(_syncScrollCaptureState);
+    }
+
+    _mergedAnimations = Listenable.merge([_ac, _acFooter]);
 
     // Super Init State
     super.initState();
@@ -296,6 +276,18 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     oldWidget.controller?.removeListener(_animatedPanel);
     widget.controller?.addListener(_animatedPanel);
+    if (oldWidget.panelBuilder == null &&
+        widget.panelBuilder != null &&
+        _panelScrollController == null) {
+      _panelScrollController = ScrollController();
+      _panelScrollController!.addListener(_syncScrollCaptureState);
+    }
+    if (oldWidget.panelBuilder != null && widget.panelBuilder == null) {
+      _panelScrollController?.removeListener(_syncScrollCaptureState);
+      _panelScrollController?.dispose();
+      _panelScrollController = null;
+      _shouldCapturePanelDrag = true;
+    }
   }
 
   /// Animate the panel [ValueNotifier]
@@ -303,6 +295,13 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     if (_effectiveController.value != _isPanelVisible) {
       _ac.fling(velocity: _isPanelVisible ? -2.0 : 2.0);
     }
+  }
+
+  void _syncScrollCaptureState() {
+    if (_panelScrollController == null || !_panelScrollController!.hasClients) return;
+    final pos = _panelScrollController!.position;
+    final atTop = pos.pixels <= pos.minScrollExtent + 0.5;
+    _shouldCapturePanelDrag = atTop;
   }
 
   /// Animate the footer [ValueNotifier]
@@ -318,6 +317,8 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     ///Animation Controller
     _ac.dispose();
     _acFooter.dispose();
+    _panelScrollController?.removeListener(_syncScrollCaptureState);
+    _panelScrollController?.dispose();
 
     /// ValueNotifier
     // _effectiveController.dispose();
@@ -332,13 +333,28 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     if (widget.isUpSlide == false && _effectiveController.value == false) {
       return;
     }
-    _ac.value -= 1.5 * fractionDragged;
+    // Only handle downward drag when inner list at top; upward drag should be left to inner list
+    if (widget.panelBuilder != null) {
+      if (!_shouldCapturePanelDrag) {
+        _activeIntercept = false;
+        return;
+      }
+      if (delta < 0) {
+        // upward drag -> let inner list handle
+        _activeIntercept = false;
+        return;
+      }
+    }
+    _activeIntercept = true;
+    _ac.value -= widget.dragSensitivity * fractionDragged;
   }
 
   /// Gesture Vertical End [GestureDetector]
   void _handleVerticalEnd(DragEndDetails endDetails) {
     var velocity = endDetails.primaryVelocity!;
-
+    if (widget.panelBuilder != null && !_activeIntercept) {
+      return;
+    }
     if (velocity > 0.0) {
       _ac.reverse().then((x) {
         _effectiveController.value = false;
@@ -358,6 +374,7 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
         _effectiveController.value = false;
       });
     }
+    _activeIntercept = false;
   }
 
   // Get Body Animation [Paralax]
@@ -366,23 +383,25 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
 
     final openPercentage = (widget.panelMaxSize - maxSize) / widget.panelMaxSize;
 
-    return Tween<Offset>(begin: Offset(0.0, closedPercentage), end: Offset(0.0, openPercentage))
-        .animate(_ac);
+    return Tween<Offset>(
+      begin: Offset(0.0, closedPercentage),
+      end: Offset(0.0, openPercentage),
+    ).animate(_ac);
   }
 
   //Get Panel size
   double _getPanelSize() {
-    var _size = 0.0;
+    var size = 0.0;
     /* If footer is visible*/
     if (!widget.hideFooter && widget.footer != null) {
-      _size += widget.footerHeight;
+      size += widget.footerHeight;
     }
     /* If appbar is visible*/
     if (!widget.hideAppBar && widget.appBar != null) {
-      _size += widget.appBarHeight;
+      size += widget.appBarHeight;
     }
 
-    return _size;
+    return size;
   }
 
   /* Get panel maxsize location*/
@@ -408,41 +427,29 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
 
   /* Get Body location*/
   double _getBodyLocation() {
-    var _location = 0.0;
+    var location = 0.0;
 
     /* if appbar */
     if (widget.appBar != null) {
-      _location += widget.appBarHeight;
+      location += widget.appBarHeight;
     }
 
     /* if paralax*/
     if (widget.parallax) {
-      _location += _ac.value * (widget.panelMaxSize - widget.panelMinSize) * -widget.parallaxOffset;
+      location += _ac.value * (widget.panelMaxSize - widget.panelMinSize) * -widget.parallaxOffset;
     }
-    return _location;
+    return location;
   }
 
-  double _getBodyHeight() {
-    var _size = widget.panelMinSize;
-    /* If appbar is visible*/
-    if (widget.appBar != null) _size += widget.appBarHeight;
-
-    /* if no panelMinSize value*/
-    if (widget.panelMinSize == 0.0 && widget.footer != null) {
-      _size += widget.footerHeight;
-    }
-
-    return _size;
-  }
 
   @override
   Widget build(BuildContext context) {
-    //Get MediaQuery Sizes
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final bottom = MediaQuery.of(context).padding.bottom <= 0
-        ? 30
-        : MediaQuery.of(context).padding.bottom / 1.3;
+        ? 8.w
+        : MediaQuery.of(context).padding.bottom / (Platform.isAndroid ? 1 : 1.5);
+    final double panelPadBase = 60.w; // 面板内容顶部基础间距常量
 
     return Container(
       height: height,
@@ -463,7 +470,7 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                     height: height,
                     // height: height,
                     width: widget.bodyWidth ?? width,
-                    child: child,
+                    child: RepaintBoundary(child: child),
                   ),
                 ),
               );
@@ -477,9 +484,7 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
               if (_effectiveController.isOpened && widget.isDismissible) {
                 return GestureDetector(
                   onTap: _effectiveController.hide,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+                  child: Container(color: Colors.transparent),
                 );
               }
               return const SizedBox();
@@ -487,26 +492,106 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
           ),
           /** Panel widget **/
           AnimatedBuilder(
-            animation: Listenable.merge([_ac, _acFooter]),
+            animation: _mergedAnimations,
             builder: (_, child) {
               return SlideTransition(
                 position: _getAnimationOffSet(
-                    maxSize: _getPanelLocation(),
-                    minSize:
-                        widget.panelMinSize + _getFooterOffset() + (1 - _acFooter.value) * bottom),
-                child: GestureDetector(
-                  onVerticalDragUpdate: _handleVerticalUpdate,
-                  onVerticalDragEnd: _handleVerticalEnd,
-                  child: AnimatedContainer(
+                  maxSize: _getPanelLocation(),
+                  minSize:
+                      widget.panelMinSize + _getFooterOffset() + (1 - _acFooter.value) * bottom,
+                ),
+                child: Listener(
+                  onPointerDown: (e) {
+                    _activeIntercept = false;
+                    _dySamples.clear();
+                    _timeSamples.clear();
+                  },
+                  onPointerMove: (e) {
+                    if (widget.panelBuilder != null) {
+                      _dySamples.add(e.delta.dy);
+                      _timeSamples.add(e.timeStamp);
+                      if (_dySamples.length > 5) {
+                        _dySamples.removeAt(0);
+                        _timeSamples.removeAt(0);
+                      }
+                      final atTop = _shouldCapturePanelDrag;
+                      final isOpen = _ac.value >= 1.0 - 1e-3;
+                      final isClosed = _ac.value <= 1e-3;
+                      if (e.delta.dy < 0) {
+                        // upward: open panel if not fully open
+                        if (!isOpen) {
+                          _activeIntercept = true;
+                          final fractionDragged = e.delta.dy / widget.panelMaxSize;
+                          _ac.value -= widget.dragSensitivity * fractionDragged;
+                          return;
+                        }
+                        _activeIntercept = false;
+                        return;
+                      } else if (e.delta.dy > 0) {
+                        // downward: close panel only when inner list at top
+                        if (atTop && !isClosed) {
+                          _activeIntercept = true;
+                          final fractionDragged = e.delta.dy / widget.panelMaxSize;
+                          _ac.value -= widget.dragSensitivity * fractionDragged;
+                          return;
+                        }
+                        _activeIntercept = false;
+                        return;
+                      }
+                    }
+                  },
+                  onPointerUp: (e) {
+                    if (widget.panelBuilder != null) {
+                      if (!_activeIntercept) return;
+                      double velocity = 0.0;
+                      if (_dySamples.isNotEmpty) {
+                        final double dySum = _dySamples.fold(0.0, (a, b) => a + b);
+                        final Duration start = _timeSamples.first;
+                        final Duration end = _timeSamples.last;
+                        final int dtMs = (end - start).inMilliseconds.abs();
+                        if (dtMs > 0) velocity = (dySum / dtMs) * 1000.0;
+                      }
+                      const double flingThreshold = 700.0;
+                      if (velocity > flingThreshold) {
+                        _closingInProgress = true;
+                        _ac
+                            .reverse()
+                            .then((_) => _effectiveController.value = false)
+                            .whenComplete(() => _closingInProgress = false);
+                      } else if (velocity < -flingThreshold) {
+                        _ac.forward().then((_) => _effectiveController.value = true);
+                      } else {
+                        if (_ac.value >= 0.5) {
+                          _ac.forward().then((_) => _effectiveController.value = true);
+                        } else {
+                          _closingInProgress = true;
+                          _ac
+                              .reverse()
+                              .then((_) => _effectiveController.value = false)
+                              .whenComplete(() => _closingInProgress = false);
+                        }
+                      }
+                      _activeIntercept = false;
+                      return;
+                    }
+                  },
+                  child: SizedBox(
                     height: widget.panelMaxSize,
                     width: widget.panelWidth ?? width,
-                    duration: const Duration(milliseconds: 200),
                     child: ClipRRect(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(_panelBorderRadius.value),
                         topRight: Radius.circular(_panelBorderRadius.value),
                       ),
-                      child: child,
+                      child: RepaintBoundary(
+                        child: widget.panelBuilder != null
+                            ? child
+                            : GestureDetector(
+                                onVerticalDragUpdate: (details) => _handleVerticalUpdate(details),
+                                onVerticalDragEnd: (details) => _handleVerticalEnd(details),
+                                child: child,
+                              ),
+                      ),
                     ),
                   ),
                 ),
@@ -518,13 +603,27 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                 SizedBox(
                   height: height - _getPanelSize(),
                   child: AnimatedBuilder(
-                    animation: Listenable.merge([_ac, _acFooter]),
-                    builder: (context, child) => Padding(
-                      padding: EdgeInsets.only(
-                          top: (60.w + (1 - _acFooter.value) * bottom) * (1 - _ac.value)),
-                      child: child,
+                    animation: _mergedAnimations,
+                    builder: (context, child) {
+                      final double dynamicTop =
+                          (panelPadBase + (1 - _acFooter.value) * bottom) * (1 - _ac.value);
+                      return Padding(
+                        padding: EdgeInsets.only(top: dynamicTop),
+                        child: child,
+                      );
+                    },
+                    child: FadeTransition(
+                      opacity: _fadeAnimation1,
+                      child: widget.panelBuilder != null
+                          ? PrimaryScrollController(
+                              controller: _panelScrollController!,
+                              child: IgnorePointer(
+                                ignoring: _closingInProgress,
+                                child: widget.panelBuilder!(_panelScrollController!, _ac.value),
+                              ),
+                            )
+                          : widget.panel!,
                     ),
-                    child: FadeTransition(opacity: _fadeAnimation1,child: widget.panel!,),
                   ),
                 ),
                 /** Panel Header widget **/
@@ -552,33 +651,18 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
               ],
             ),
           ),
+
+          SizedBox(height: bottom),
           // Footer Widget
           widget.footer != null
               ? AnimatedBuilder(
-                  animation: Listenable.merge([_ac, _acFooter]),
+                  animation: _mergedAnimations,
                   builder: (context, child) {
                     return Positioned(
                       height: widget.footerHeight,
                       bottom: _getFooterOffset(),
                       width: MediaQuery.of(context).size.width,
-                      child: RepaintBoundary(
-                        child: widget.footer!,
-                      ),
-                    );
-                  },
-                )
-              : const SizedBox.shrink(),
-          // AppBar
-          widget.appBar != null
-              ? AnimatedBuilder(
-                  animation: _ac,
-                  builder: (context, child) {
-                    return Positioned(
-                      height: widget.appBarHeight,
-                      top: widget.hideAppBar ? _ac.value * -widget.appBarHeight : 0.0,
-                      left: 0,
-                      right: 0,
-                      child: widget.appBar!,
+                      child: RepaintBoundary(child: widget.footer!),
                     );
                   },
                 )

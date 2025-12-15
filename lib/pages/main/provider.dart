@@ -1,18 +1,13 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:bujuan_music/common/bujuan_music_handler.dart';
 import 'package:bujuan_music/common/values/app_config.dart';
-import 'package:bujuan_music/common/values/app_images.dart';
-import 'package:bujuan_music/widgets/we_slider/weslide_controller.dart';
-import 'package:bujuan_music_api/api/mv/entity/mv_url_entity.dart';
 import 'package:bujuan_music_api/api/user/entity/user_info_entity.dart';
 import 'package:bujuan_music_api/common/music_api.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
-import 'package:hive_ce/hive.dart';
-import 'package:palette_generator/palette_generator.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../common/bujuan_music_handler_mediakit.dart';
 
 part 'provider.g.dart';
 
@@ -20,7 +15,7 @@ part 'provider.g.dart';
 class ThemeModeNotifier extends _$ThemeModeNotifier {
   @override
   ThemeMode build() =>
-      (GetIt.I<Box>().get(AppConfig.isDarkTheme) ?? false) ? ThemeMode.dark : ThemeMode.light;
+      getBoolAsync(AppConfig.isDarkTheme, defaultValue: false) ? ThemeMode.dark : ThemeMode.light;
 
   void setTheme(ThemeMode mode) {
     state = mode;
@@ -32,14 +27,9 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
 }
 
 @riverpod
-WeSlideController weSlideController(Ref ref) {
-  return WeSlideController();
-}
-
-@riverpod
 class BackgroundModeNotifier extends _$BackgroundModeNotifier {
   @override
-  String build() => (GetIt.I<Box>().get(AppConfig.backgroundPath) ?? AppImages.happy);
+  String build() => getStringAsync(AppConfig.backgroundPath, defaultValue: '');
 
   void changeBackground(String background) {
     state = background;
@@ -57,24 +47,22 @@ class CurrentIndex extends _$CurrentIndex {
 }
 
 @riverpod
-class HomeStyle extends _$HomeStyle {
-  @override
-  HomeStyleType build() => HomeStyleType.bottomBar; // 初始值
-
-  void setIndex(HomeStyleType type) {
-    state = type; // 修改值
-  }
-}
-
-enum HomeStyleType { draw, bottomBar }
-
-@riverpod
 class BoxPanelDetailData extends _$BoxPanelDetailData {
   @override
   double build() => 0;
 
   void updatePanelDetail(double newValue) {
     state = newValue;
+  }
+}
+
+@riverpod
+class MediaImageColor extends _$MediaImageColor {
+  @override
+  Color build() => Color(0XFF1ED760).withAlpha(100);
+
+  void updateColor(Color color) {
+    state = color;
   }
 }
 
@@ -96,61 +84,16 @@ Stream<MediaItem?> mediaItem(Ref ref) {
 }
 
 @riverpod
+Stream<List<MediaItem>> mediaList(Ref ref) {
+  return BujuanMusicHandler().queue.stream;
+}
+
+@riverpod
 Stream<PlaybackState?> playbackState(Ref ref) {
   return BujuanMusicHandler().playbackState.stream;
 }
 
-// _player.onPositionChanged
-
 @riverpod
 Future<UserInfoEntity?> userInfo(Ref ref) async {
   return await BujuanMusicManager().userInfo();
-}
-
-@riverpod
-Future<MvUrlEntity?> mvUrl(Ref ref) async {
-  // var url = ref.watch(mediaItemProvider).value.extras?['mvId'];
-  // return await BujuanMusicManager().mvUrl(id: id);
-}
-
-@riverpod
-Future<UserInfoEntity?> lyric(Ref ref) async {
-  return await BujuanMusicManager().userInfo();
-}
-
-@riverpod
-Future<PaletteGenerator> mediaColor(Ref ref) async {
-  final artUri = ref.watch(
-    mediaItemProvider.select((m) => m.value?.artUri.toString()),
-  );
-  if (artUri == null || artUri.isEmpty) {
-    return PaletteGenerator.fromColors([PaletteColor(Colors.grey, 1)]);
-  }
-  final imageProvider = CachedNetworkImageProvider('$artUri?param=200y200');
-  return PaletteGenerator.fromImageProvider(
-    imageProvider,
-    size: const Size(200, 200),
-  );
-}
-
-/// 播放模式
-@riverpod
-class LoopModeNotifier extends _$LoopModeNotifier {
-  @override
-  LoopMode build() => LoopMode.playlist;
-
-  void changeMode() {
-    switch (BujuanMusicHandler().loopMode) {
-      case LoopMode.one:
-        state = LoopMode.playlist;
-        break;
-      case LoopMode.playlist:
-        state = LoopMode.shuffle;
-        break;
-      case LoopMode.shuffle:
-        state = LoopMode.one;
-        break;
-    }
-    BujuanMusicHandler().setLoopMode(state);
-  }
 }

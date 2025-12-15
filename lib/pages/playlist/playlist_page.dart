@@ -1,14 +1,18 @@
-import 'package:bujuan_music/common/bujuan_music_handler.dart';
-import 'package:bujuan_music/pages/main/phone/widgets.dart';
+import 'dart:io';
+
 import 'package:bujuan_music/pages/playlist/provider.dart';
+import 'package:bujuan_music/utils/color_utils.dart';
 import 'package:bujuan_music/widgets/cache_image.dart';
 import 'package:bujuan_music/widgets/items.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
+import 'package:image_pixels/image_pixels.dart';
 
+import '../../common/bujuan_music_handler_mediakit.dart';
 import '../../utils/adaptive_screen_utils.dart';
 import '../../widgets/loading.dart';
 
@@ -24,7 +28,7 @@ class PlaylistPage extends ConsumerWidget {
     return Scaffold(
       body: album.when(
         data: (details) =>
-        desktop ? DesktopPlayList(details: details) : MobilePlayList(details: details),
+            desktop ? DesktopPlayList(details: details) : MobilePlayList(details: details),
         loading: () => const Center(child: LoadingIndicator()),
         error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
       ),
@@ -39,22 +43,80 @@ class MobilePlayList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(details.detail.playlist?.name??''),),
-      body: CustomScrollView(
-        slivers: [
-          SliverList.builder(
+    var scaffoldBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    var of = MediaQuery.of(context);
+    return Stack(
+      children: [
+        ImagePixels(
+          builder: (context, img) {
+            var color = img.pixelColorAtAlignment!(Alignment.centerLeft).withAlpha(180);
+            var blend = ColorUtils.blend(color, scaffoldBackgroundColor, .7);
+            return Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [blend, scaffoldBackgroundColor],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            );
+          },
+          imageProvider: CachedNetworkImageProvider(
+            '${details.detail.playlist?.coverImgUrl ?? ''}?param=100y100',
+          ),
+        ),
+        NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              backgroundColor: Colors.transparent,
+              expandedHeight: 260.w,
+              pinned: true,
+              floating: false,
+              stretch: true,
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: false,
+                collapseMode: CollapseMode.parallax,
+                titlePadding: EdgeInsets.only(left: 50.w, bottom: 16),
+                expandedTitleScale: 1,
+                title: Text(
+                  details.detail.playlist?.name ?? '',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 18.sp,color: IconTheme.of(context).color),
+                ),
+                background: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // SizedBox(height: of.padding.top ),
+                    CachedImage(
+                      imageUrl: details.detail.playlist?.coverImgUrl ?? '',
+                      width: 180.w,
+                      height: 180.w,
+                      borderRadius: 30.w,
+                      pWidth: 300,
+                      pHeight: 300,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          body: ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.only(bottom: 68.w + of.padding.bottom / (Platform.isAndroid ? 1 : 1.5)),
             itemCount: details.medias.length,
+            itemExtent: 75,
             itemBuilder: (context, index) => MediaItemWidget(
               mediaItem: details.medias[index],
-              onTap: () => BujuanMusicHandler().updateQueue(details.medias, index: index),
+              onTap: () => BujuanMusicHandler().updateQueue(
+                details.medias,
+                index: index,
+                queueName: details.detail.playlist?.name ?? "",
+              ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: DynamicPadding(hasBottom: false,),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 }
@@ -68,8 +130,7 @@ class DesktopPlayList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-            onPressed: () => context.pop(), icon: Icon(HugeIconsSolid.cancel01)),
+        leading: IconButton(onPressed: () => context.pop(), icon: Icon(HugeIconsSolid.cancel01)),
         title: Text(details.detail.playlist?.name ?? ''),
         backgroundColor: Colors.transparent,
       ),
@@ -89,26 +150,29 @@ class DesktopPlayList extends StatelessWidget {
                   ),
                   SizedBox(height: 20.w),
                   Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15.w),
-                        child: Text(
-                          details.detail.playlist?.description ?? '暂无描述！！',
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ))
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 15.w),
+                      child: Text(
+                        details.detail.playlist?.description ?? '暂无描述！！',
+                        style: TextStyle(fontSize: 14.sp),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
           Expanded(
-              child: ListView.builder(
-            padding: EdgeInsets.only(top: 0, bottom: 45.w),
-            itemCount: details.medias.length,
-            itemBuilder: (context, index) => MediaItemWidget(
-              mediaItem: details.medias[index],
-              onTap: () => BujuanMusicHandler().updateQueue(details.medias, index: index),
+            child: ListView.builder(
+              padding: EdgeInsets.only(top: 0, bottom: 45.w),
+              itemExtent: 75,
+              itemCount: details.medias.length,
+              itemBuilder: (context, index) => MediaItemWidget(
+                mediaItem: details.medias[index],
+                onTap: () => BujuanMusicHandler().updateQueue(details.medias, index: index),
+              ),
             ),
-          ))
+          ),
         ],
       ),
     );

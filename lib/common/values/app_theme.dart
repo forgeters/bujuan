@@ -11,8 +11,8 @@ class AppTheme {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedLabelStyle: TextStyle(fontSize: 14),
-          selectedIconTheme: IconThemeData(color: Color(0XFF1ED760),size: 24.sp),
-          unselectedIconTheme: IconThemeData(color: Colors.grey,size: 24.sp),
+          selectedIconTheme: IconThemeData(color: Color(0XFF1ED760), size: 24.sp),
+          unselectedIconTheme: IconThemeData(color: Colors.grey, size: 24.sp),
           unselectedItemColor: Colors.grey,
           selectedItemColor: Color(0XFF1ED760)),
       appBarTheme: AppBarTheme(
@@ -26,16 +26,16 @@ class AppTheme {
           )));
   static ThemeData light = ThemeData.light(useMaterial3: false).copyWith(
       scaffoldBackgroundColor: Colors.white,
-      listTileTheme: ListTileThemeData().copyWith(iconColor:Color(0xFF2C2C2C)),
+      listTileTheme: ListTileThemeData().copyWith(iconColor: Color(0xFF2C2C2C)),
       brightness: Brightness.light,
-      iconTheme: IconThemeData().copyWith(color: Color(0xFF2C2C2C)),
+      iconTheme: IconThemeData(color:Color(0xFF656565)),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedLabelStyle: TextStyle(fontSize: 14),
-          selectedIconTheme: IconThemeData(color: Color(0XFF1ED760),size: 24.sp),
-          unselectedIconTheme: IconThemeData(color: Colors.grey,size: 24.sp),
-          unselectedItemColor: Colors.grey,
+          selectedIconTheme: IconThemeData(color: Color(0XFF1ED760), size: 24.sp),
+          unselectedIconTheme: IconThemeData(color: Color(0xFF656565), size: 24.sp),
+          unselectedItemColor: Color(0xFF656565),
           selectedItemColor: Color(0XFF1ED760)),
       appBarTheme: AppBarTheme(
           elevation: 0,

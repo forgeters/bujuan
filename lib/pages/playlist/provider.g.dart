@@ -6,7 +6,7 @@ part of 'provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$playlistDetailHash() => r'cf318e836f349c3f6d79acce408baea5811de48d';
+String _$playlistDetailHash() => r'3d5c2dc1c694eeea7eb0ba153fbea44ce9938cac';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -39,21 +39,15 @@ class PlaylistDetailFamily extends Family<AsyncValue<PlaylistData>> {
   const PlaylistDetailFamily();
 
   /// See also [playlistDetail].
-  PlaylistDetailProvider call(
-    int id,
-  ) {
-    return PlaylistDetailProvider(
-      id,
-    );
+  PlaylistDetailProvider call(int id) {
+    return PlaylistDetailProvider(id);
   }
 
   @override
   PlaylistDetailProvider getProviderOverride(
     covariant PlaylistDetailProvider provider,
   ) {
-    return call(
-      provider.id,
-    );
+    return call(provider.id);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -74,24 +68,20 @@ class PlaylistDetailFamily extends Family<AsyncValue<PlaylistData>> {
 /// See also [playlistDetail].
 class PlaylistDetailProvider extends AutoDisposeFutureProvider<PlaylistData> {
   /// See also [playlistDetail].
-  PlaylistDetailProvider(
-    int id,
-  ) : this._internal(
-          (ref) => playlistDetail(
-            ref as PlaylistDetailRef,
-            id,
-          ),
-          from: playlistDetailProvider,
-          name: r'playlistDetailProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$playlistDetailHash,
-          dependencies: PlaylistDetailFamily._dependencies,
-          allTransitiveDependencies:
-              PlaylistDetailFamily._allTransitiveDependencies,
-          id: id,
-        );
+  PlaylistDetailProvider(int id)
+    : this._internal(
+        (ref) => playlistDetail(ref as PlaylistDetailRef, id),
+        from: playlistDetailProvider,
+        name: r'playlistDetailProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$playlistDetailHash,
+        dependencies: PlaylistDetailFamily._dependencies,
+        allTransitiveDependencies:
+            PlaylistDetailFamily._allTransitiveDependencies,
+        id: id,
+      );
 
   PlaylistDetailProvider._internal(
     super._createNotifier, {
@@ -157,5 +147,6 @@ class _PlaylistDetailProviderElement
   @override
   int get id => (origin as PlaylistDetailProvider).id;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

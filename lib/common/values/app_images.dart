@@ -1,7 +1,7 @@
 class AppImages {
-  static const String logo = 'assets/images/logo.png';
+  static const String logo = 'assets/images/logo.webp';
 
-  static const String banner = 'assets/images/banner.png';
+  static const String banner = 'assets/images/banner.webp';
   static const String happy = 'assets/images/happy_meeple.riv';
   static const String dagger = 'assets/images/dagger.riv';
   static const String girl = 'assets/images/girl.riv';

@@ -5,6 +5,8 @@
     <!-- ADD THESE TWO PERMISSIONS -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- ALSO ADD THIS PERMISSION IF TARGETING SDK 34 -->
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
@@ -12,15 +14,16 @@
 
     <application
         android:name="${applicationName}"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="bujuan_music"
         android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="m">
         <activity
             android:name="com.ryanheise.audioservice.AudioServiceActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
-            android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
@@ -43,9 +46,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <meta-data
-            android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="true" />
         <!-- ADD THIS "SERVICE" element -->
         <service
             android:name="com.ryanheise.audioservice.AudioService"

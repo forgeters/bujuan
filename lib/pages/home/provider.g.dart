@@ -6,7 +6,7 @@ part of 'provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$newAlbumHash() => r'25d8563a4bc59260b7288ac0ecbda08d303f295d';
+String _$newAlbumHash() => r'5a8df7614efa40593729aaddf1a67ba1ca124a27';
 
 /// See also [newAlbum].
 @ProviderFor(newAlbum)
@@ -28,14 +28,15 @@ String _$recommendSongsHash() => r'a095ca7deb5c0a1c1e9c5b205557d9366e6bffda';
 @ProviderFor(recommendSongs)
 final recommendSongsProvider =
     AutoDisposeFutureProvider<List<MediaItem>>.internal(
-  recommendSongs,
-  name: r'recommendSongsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$recommendSongsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      recommendSongs,
+      name: r'recommendSongsProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$recommendSongsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:bujuan_music/common/bujuan_music_handler.dart';
+import 'package:bujuan_music/common/local_proxy_service.dart';
 import 'package:bujuan_music/common/values/app_theme.dart';
 import 'package:bujuan_music/pages/main/provider.dart';
 import 'package:bujuan_music/router/router.dart';
@@ -10,33 +10,38 @@ import 'package:bujuan_music/widgets/we_slider/weslide_controller.dart';
 import 'package:bujuan_music_api/bujuan_music_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive_ce_flutter/adapters.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'common/bujuan_music_handler_mediakit.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initMedia();
-  await initWindow();
-  await Hive.initFlutter();
-  await Hive.openBox('bujuan');
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent, // 底部手势栏透明
-      statusBarColor: Colors.transparent));
+  LocalProxyService().start();
+  if (Platform.isAndroid) {
+    await FlutterDisplayMode.setHighRefreshRate();
+  }
   GetIt getIt = GetIt.instance;
-  getIt.registerSingleton<ZoomDrawerController>(ZoomDrawerController());
-  getIt.registerSingleton<WeSlideController>(WeSlideController(initial: true),instanceName: 'footer');
-  getIt.registerSingleton<WeSlideController>(WeSlideController(),instanceName: 'panel');
-  getIt.registerSingleton<Box>(Hive.box('bujuan'));
+
+  await initMedia();
+  await initialize();
+  getIt.registerSingleton<WeSlideController>(
+    WeSlideController(initial: true),
+    instanceName: 'footer',
+  );
+  getIt.registerSingleton<WeSlideController>(WeSlideController(), instanceName: 'panel');
   // 让布局真正覆盖状态栏和底部手势栏
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(ProviderScope(child: MyApp()));
 }
 
+//帧率
 /// 初始化窗口
 Future<void> initWindow() async {
   if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
@@ -60,6 +65,7 @@ Future<void> initWindow() async {
 
 /// 初始化音频服务
 Future<void> initMedia() async {
+  MediaKit.ensureInitialized();
   final appDocDir = await getApplicationDocumentsDirectory();
   await BujuanMusicManager().init(cookiePath: '${appDocDir.path}/cookies', debug: false);
   await AudioService.init(
@@ -70,31 +76,6 @@ Future<void> initMedia() async {
     ),
   );
 }
-
-/// 开启本地代理服务
-// Future<void> startLocalRedirectServer() async {
-//   final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 8848);
-//   server.listen((HttpRequest request) async {
-//     final path = request.uri.path;
-//     if (path.startsWith('/song/')) {
-//       final songId = path.split('/').last;
-//       final realUrl = await BujuanMusicHandler().getSongUrl(songId);
-//       final client = HttpClient();
-//       final realRequest = await client.getUrl(Uri.parse(realUrl));
-//       final realResponse = await realRequest.close();
-//       log('$songId--------------$realUrl');
-//       request.response.statusCode = realResponse.statusCode;
-//       request.response.headers.contentType = realResponse.headers.contentType;
-//       await realResponse.pipe(request.response);
-//     } else {
-//       request.response
-//         ..statusCode = 404
-//         ..write('Not found')
-//         ..close();
-//     }
-//   });
-//
-// }
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -109,22 +90,28 @@ class MyApp extends ConsumerWidget {
 
     return ScreenUtilInit(
       designSize: size,
-      builder: (_, __) => AnnotatedRegion(value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        systemStatusBarContrastEnforced: true
-      ), child: Consumer(builder: (_, ref, __) {
-        final themeMode = ref.watch(themeModeNotifierProvider);
-        return MaterialApp.router(
-          title: 'Bujuan',
-          themeMode: themeMode,
-          darkTheme: AppTheme.dark,
-          showPerformanceOverlay: true,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          routerConfig: router,
-        );
-      })),
+      builder: (_, __) => Consumer(
+        builder: (_, ref, __) {
+          final themeMode = ref.watch(themeModeNotifierProvider);
+          return AnnotatedRegion(
+            value: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              systemNavigationBarColor: Colors.transparent,
+              systemStatusBarContrastEnforced: false,
+              systemNavigationBarContrastEnforced: false,
+            ),
+            child: MaterialApp.router(
+              title: 'Bujuan',
+              themeMode: themeMode,
+              darkTheme: AppTheme.dark,
+              // showPerformanceOverlay: true,
+              // checkerboardOffscreenLayers: true,
+              theme: AppTheme.light,
+              routerConfig: router,
+            ),
+          );
+        },
+      ),
     );
   }
 }

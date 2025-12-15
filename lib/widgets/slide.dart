@@ -1,8 +1,6 @@
 import 'package:bujuan_music/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
-import 'package:get_it/get_it.dart';
 
 import '../pages/main/provider.dart';
 
@@ -274,7 +272,6 @@ class _SlidingBoxState extends State<SlidingBox> with SingleTickerProviderStateM
                       GestureDetector(
                         // onTap: _onGestureTap,
                         onTap: () {
-                          GetIt.I<ZoomDrawerController>().toggle?.call();
                         },
                         onVerticalDragUpdate: (e) {},
                         child: Container(

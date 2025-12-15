@@ -1,4 +1,5 @@
 import 'package:bujuan_music/pages/user/provider.dart';
+import 'package:bujuan_music/widgets/backdrop.dart';
 import 'package:bujuan_music/widgets/main_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,14 +19,11 @@ class UserPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final album = ref.watch(newAlbumProvider);
     bool desktop = medium(context) || expanded(context);
-    return Scaffold(
-      appBar: desktop ? null : mainAppBar(),
-      body: album.when(
-        data: (playlist) =>
-            desktop ? DesktopUser(playlist: playlist) : MobileUser(playlist: playlist),
-        loading: () => const Center(child: LoadingIndicator()),
-        error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
-      ),
+    return album.when(
+      data: (playlist) =>
+          desktop ? DesktopUser(playlist: playlist) : MobileUser(playlist: playlist),
+      loading: () => const Center(child: LoadingIndicator()),
+      error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
     );
   }
 }
@@ -37,67 +35,61 @@ class MobileUser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15.w),
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.w),
-              child: Row(
-                children: [
-                  CachedImage(
-                    imageUrl: playlist.userInfo.avatarUrl ?? "",
-                    width: 40.w,
-                    height: 40.w,
-                    pHeight: 100,
-                    pWidth: 100,
-                    borderRadius: 20.w,
-                  ),
-                  SizedBox(width: 10.w),
-                  Text(
-                    "Music library (${playlist.likeList.playlist?.length})",
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
+    return Scaffold(
+      appBar: mainAppBar(
+          leading: CachedImage(
+            imageUrl: playlist.userInfo.avatarUrl ?? "",
+            width: 35.w,
+            height: 35.w,
+            pHeight: 100,
+            pWidth: 100,
+            borderRadius: 20.w,
+          ),
+          title: 'Music library (${playlist.likeList.playlist?.length})'),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 5.w),
+        child: CustomScrollView(
+          slivers: [
+            SliverGrid.builder(
+              itemCount: (playlist.likeList.playlist ?? []).length,
+              itemBuilder: (context, index) {
+                final song = (playlist.likeList.playlist ?? [])[index];
+                return GestureDetector(
+                  child: BackdropView(
+                      padding: EdgeInsets.symmetric(horizontal: 5.w),
+                      child: Row(
+                        children: [
+                          CachedImage(
+                            imageUrl: song.coverImgUrl?.toString() ?? '',
+                            width: 40.w,
+                            height: 40.w,
+                            borderRadius: 20.w,
+                            pHeight: 80,
+                            pWidth: 80,
+                          ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                              child: Text(
+                            song.name ?? '',
+                            style: TextStyle(fontSize: 12.sp, overflow: TextOverflow.ellipsis),
+                            maxLines: 2,
+                          ))
+                        ],
+                      )),
+                  onTap: () => context.push(AppRouter.playlist, extra: song.id),
+                );
+              },
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 3.5,
+                  crossAxisSpacing: 3.w,
+                  mainAxisSpacing: 10.w),
             ),
-          ),
-          SliverGrid.builder(
-            itemCount: (playlist.likeList.playlist ?? []).length,
-            itemBuilder: (context, index) {
-              final song = (playlist.likeList.playlist ?? [])[index];
-              return GestureDetector(
-                child: Column(
-                  children: [
-                    CachedImage(
-                      imageUrl: song.coverImgUrl?.toString() ?? '',
-                      width: 108.w,
-                      height: 108.w,
-                      borderRadius: 0.w,
-                      pHeight: 200,
-                      pWidth: 200,
-                    ),
-                    Text(
-                      song.name ?? '',
-                      style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
-                      maxLines: 1,
-                    )
-                  ],
-                ),
-                onTap: () => context.push(AppRouter.playlist, extra: song.id),
-              );
-            },
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: .8,
-                crossAxisSpacing: 15.w,
-                mainAxisSpacing: 15.w),
-          ),
-          SliverToBoxAdapter(
-            child: DynamicPadding(),
-          )
-        ],
+            SliverToBoxAdapter(
+              child: DynamicPadding(),
+            )
+          ],
+        ),
       ),
     );
   }

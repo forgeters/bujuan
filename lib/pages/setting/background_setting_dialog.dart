@@ -1,15 +1,11 @@
 import 'package:bujuan_music/common/values/app_config.dart';
 import 'package:bujuan_music/common/values/app_images.dart';
 import 'package:bujuan_music/pages/main/provider.dart';
-import 'package:bujuan_music/widgets/rive_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
-// import 'package:rive_native/rive_native.dart' as rive;
+import 'package:nb_utils/nb_utils.dart';
 
 class BackgroundSettingDialog extends StatefulWidget {
   const BackgroundSettingDialog({super.key});
@@ -113,9 +109,9 @@ class _BackgroundSettingDialogState extends State<BackgroundSettingDialog> {
                                   backgroundModeNotifier.changeBackground(background.background);
                                   themeModeNotifier.setTheme(background.themeMode);
                                   var isDark = background.themeMode == ThemeMode.dark;
-                                  GetIt.I<Box>().put(AppConfig.isDarkTheme, isDark);
-                                  GetIt.I<Box>()
-                                      .put(AppConfig.backgroundPath, background.background);
+                                  setValue(AppConfig.isDarkTheme, isDark);
+                                  // GetIt.I<Box>()
+                                  //     .put(AppConfig.backgroundPath, background.background);
                                 },
                               );
                             })

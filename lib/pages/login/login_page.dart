@@ -1,3 +1,4 @@
+import 'package:bujuan_music/common/values/app_config.dart';
 import 'package:bujuan_music/common/values/app_images.dart';
 import 'package:bujuan_music/router/app_router.dart';
 import 'package:bujuan_music_api/bujuan_music_api.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:pinput/pinput.dart';
 
 class LoginPage extends StatefulWidget {
@@ -148,12 +150,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void goToHome(String code) async {
-    var loginEntity = await BujuanMusicManager()
-        .loginCellPhone(phone: phoneController.text, captcha: code);
+    var loginEntity =
+        await BujuanMusicManager().loginCellPhone(phone: phoneController.text, captcha: code);
     if (loginEntity != null && loginEntity.code == 200) {
-      phoneController.text = '';
-      if (mounted) {
-        context.replace(AppRouter.home);
+      var userInfo = await BujuanMusicManager().userInfo();
+      if (userInfo != null && userInfo.profile != null) {
+        setValue(AppConfig.userInfoKey, userInfo.profile?.toJson());
+        phoneController.text = '';
+        if (mounted) {
+          context.replace(AppRouter.home);
+        }
       }
     }
   }

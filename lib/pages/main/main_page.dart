@@ -1,4 +1,3 @@
-import 'package:bujuan_music/common/bujuan_music_handler.dart';
 import 'package:bujuan_music/common/values/app_images.dart';
 import 'package:bujuan_music/pages/main/menu_page.dart';
 import 'package:bujuan_music/pages/main/phone/widgets.dart';
@@ -11,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
+import '../../common/bujuan_music_handler_mediakit.dart';
 import '../../utils/adaptive_screen_utils.dart';
 
 
@@ -23,26 +23,11 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     bool desktop = medium(context) || expanded(context);
     return Scaffold(
-      body: desktop ? DesktopView(child: child) : MobileView(child: child),
+      body: desktop ? DesktopView(child: child) : SliderWidget(child: child),
     );
   }
 }
 
-class MobileView extends ConsumerWidget {
-  final Widget child;
-
-  const MobileView({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context,WidgetRef ref) {
-    // return SliderWidget(showBottomBar: true, child: child);
-   var homeStyle = ref.watch(homeStyleProvider);
-    return switch(homeStyle){
-      HomeStyleType.draw => DrawerWidget(child: child),
-      HomeStyleType.bottomBar => SliderWidget(showBottomBar: true, child: child),
-    };
-  }
-}
 
 class BottomData {
   IconData iconData;
@@ -117,7 +102,7 @@ class DesktopView extends StatelessWidget {
             Consumer(builder: (context, ref, child) {
               var playbackState = ref.watch(playbackStateProvider).value;
               return IconButton(
-                  onPressed: () => BujuanMusicHandler().playOrPause(),
+                  onPressed: () {},
                   icon: Icon(
                     (playbackState?.playing ?? false) ? HugeIconsSolid.pause : HugeIconsSolid.play,
                     size: 22.sp,

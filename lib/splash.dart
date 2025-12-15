@@ -1,14 +1,12 @@
-import 'dart:convert';
 
 import 'package:bujuan_music/common/values/app_config.dart';
 import 'package:bujuan_music/common/values/app_images.dart';
 import 'package:bujuan_music/router/app_router.dart';
-import 'package:bujuan_music_api/bujuan_music_api.dart';
+import 'package:bujuan_music_api/api/user/entity/user_info_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -25,11 +23,16 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   void getUserInfo() async {
-    var userInfo = await BujuanMusicManager().userInfo();
-    var bool = (userInfo != null && userInfo.account != null);
-    if(bool) GetIt.I<Box>().put(AppConfig.userInfoKey, jsonEncode(userInfo.profile?.toJson()));
-    if (mounted) {
-      context.replace(bool ? AppRouter.home : AppRouter.login);
+    try {
+      var userInfo = getJSONAsync(AppConfig.userInfoKey, defaultValue: {});
+      var bool = (userInfo.isNotEmpty && UserInfoProfile.fromJson(userInfo).userId != null);
+      if (mounted) {
+        context.replace(bool ? AppRouter.home : AppRouter.login);
+      }
+    } catch (e) {
+      if (mounted) {
+        context.replace(AppRouter.login);
+      }
     }
   }
 

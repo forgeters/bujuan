@@ -39,21 +39,13 @@ class MvUrlFamily extends Family<AsyncValue<MvData>> {
   const MvUrlFamily();
 
   /// See also [mvUrl].
-  MvUrlProvider call(
-    int id,
-  ) {
-    return MvUrlProvider(
-      id,
-    );
+  MvUrlProvider call(int id) {
+    return MvUrlProvider(id);
   }
 
   @override
-  MvUrlProvider getProviderOverride(
-    covariant MvUrlProvider provider,
-  ) {
-    return call(
-      provider.id,
-    );
+  MvUrlProvider getProviderOverride(covariant MvUrlProvider provider) {
+    return call(provider.id);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -74,23 +66,17 @@ class MvUrlFamily extends Family<AsyncValue<MvData>> {
 /// See also [mvUrl].
 class MvUrlProvider extends AutoDisposeFutureProvider<MvData> {
   /// See also [mvUrl].
-  MvUrlProvider(
-    int id,
-  ) : this._internal(
-          (ref) => mvUrl(
-            ref as MvUrlRef,
-            id,
-          ),
-          from: mvUrlProvider,
-          name: r'mvUrlProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$mvUrlHash,
-          dependencies: MvUrlFamily._dependencies,
-          allTransitiveDependencies: MvUrlFamily._allTransitiveDependencies,
-          id: id,
-        );
+  MvUrlProvider(int id)
+    : this._internal(
+        (ref) => mvUrl(ref as MvUrlRef, id),
+        from: mvUrlProvider,
+        name: r'mvUrlProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product') ? null : _$mvUrlHash,
+        dependencies: MvUrlFamily._dependencies,
+        allTransitiveDependencies: MvUrlFamily._allTransitiveDependencies,
+        id: id,
+      );
 
   MvUrlProvider._internal(
     super._createNotifier, {
@@ -105,9 +91,7 @@ class MvUrlProvider extends AutoDisposeFutureProvider<MvData> {
   final int id;
 
   @override
-  Override overrideWith(
-    FutureOr<MvData> Function(MvUrlRef provider) create,
-  ) {
+  Override overrideWith(FutureOr<MvData> Function(MvUrlRef provider) create) {
     return ProviderOverride(
       origin: this,
       override: MvUrlProvider._internal(
@@ -155,5 +139,6 @@ class _MvUrlProviderElement extends AutoDisposeFutureProviderElement<MvData>
   @override
   int get id => (origin as MvUrlProvider).id;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

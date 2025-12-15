@@ -26,6 +26,7 @@ class CachedImage extends StatelessWidget {
     this.pHeight = 500,
   });
 
+  //唱片机
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -50,9 +51,7 @@ class CachedImage extends StatelessWidget {
       width: width,
       height: height,
       color: Colors.grey.shade200,
-      child: LoadingIndicator(
-        size: Size((width ?? 0) / 3, (width ?? 0) / 3),
-      ),
+      child: LoadingIndicator(size: Size((width ?? 0) / 3, (width ?? 0) / 3)),
     );
   }
 
@@ -61,9 +60,7 @@ class CachedImage extends StatelessWidget {
       width: width,
       height: height,
       color: Colors.grey.shade300,
-      child: LoadingIndicator(
-        size: Size((width ?? 0) / 3, (width ?? 0) / 3),
-      ),
+      child: LoadingIndicator(size: Size((width ?? 0) / 3, (width ?? 0) / 3)),
     );
   }
 }
