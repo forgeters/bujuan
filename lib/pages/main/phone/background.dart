@@ -2,14 +2,17 @@ import 'package:bujuan_music/utils/color_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_pixels/image_pixels.dart';
 
 import '../provider.dart';
 
 class PlayBackgroundStyle1 extends ConsumerWidget {
   final double? height;
+  final Alignment? begin;
+  final Alignment? end;
 
-  const PlayBackgroundStyle1({super.key, this.height});
+  const PlayBackgroundStyle1({super.key, this.height, this.begin, this.end});
 
   ///黑胶
   @override
@@ -23,10 +26,10 @@ class PlayBackgroundStyle1 extends ConsumerWidget {
 
     Widget buildGradientFromImage(String url) {
       return ImagePixels(
-        imageProvider: CachedNetworkImageProvider('$url?param=150y150'),
+        imageProvider: CachedNetworkImageProvider('$url?param=100y100'),
         builder: (context, img) {
           if (!img.hasImage) {
-            return SizedBox(width: size.width, height: h);
+            return Container(width: size.width, height: h, color: scaffoldBackgroundColor);
           }
           final top = ColorUtils.blend(
             img.pixelColorAtAlignment!(Alignment.topCenter),
@@ -36,25 +39,23 @@ class PlayBackgroundStyle1 extends ConsumerWidget {
           final mid = ColorUtils.blend(
             img.pixelColorAtAlignment!(Alignment.center),
             scaffoldBackgroundColor,
-            .7,
+            begin != null ? 0.86 : 0.7,
           );
           final bottom = ColorUtils.blend(
             img.pixelColorAtAlignment!(Alignment.bottomCenter),
             scaffoldBackgroundColor,
             .75,
           );
-          return SizedBox(
-            width: size.width,
-            height: h,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [top, mid, bottom],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: begin != null ? [mid, scaffoldBackgroundColor] : [top, mid, bottom],
+                begin: begin ?? Alignment.topCenter,
+                end: end ?? Alignment.bottomCenter,
               ),
             ),
+            width: size.width,
+            height: h,
           );
         },
       );
@@ -67,9 +68,10 @@ class PlayBackgroundStyle1 extends ConsumerWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [scaffoldBackgroundColor, scaffoldBackgroundColor],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: begin ?? Alignment.topCenter,
+            end: end ?? Alignment.bottomCenter,
           ),
+          borderRadius: BorderRadius.circular(30.w),
         ),
       ),
     );

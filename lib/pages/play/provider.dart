@@ -1,6 +1,5 @@
 import 'package:bujuan_music/pages/main/provider.dart';
 import 'package:bujuan_music_api/bujuan_music_api.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../widgets/lyric/mode/lyric_line.dart';

@@ -8,20 +8,28 @@ import 'package:hugeicons_pro/hugeicons.dart';
 AppBar mainAppBar({Widget? leading, String? title}) {
   return AppBar(
     leading: IconButton(
-        onPressed: () {}, icon: leading ?? Image.asset(AppImages.logo, width: 35.w, height: 35.w)),
-    title: Text(title ?? 'BuJuan',style: TextStyle(fontWeight: FontWeight.bold),),
+      onPressed: () {},
+      icon: leading ?? Image.asset(AppImages.logo, width: 35.w, height: 35.w),
+    ),
+    title: Text(
+      title ?? 'BuJuan',
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
     leadingWidth: 55.w,
     actions: [
-      Consumer(builder: (context, ref, child) {
-        return IconButton(
+      Consumer(
+        builder: (context, ref, child) {
+          return IconButton(
             onPressed: () {
-              bool isDark = ref.read(themeModeNotifierProvider) == ThemeMode.dark;
+              bool isDark = ref.read(themeModeProvider) == ThemeMode.dark;
               ref
-                  .read(themeModeNotifierProvider.notifier)
+                  .read(themeModeProvider.notifier)
                   .setTheme(isDark ? ThemeMode.light : ThemeMode.dark);
             },
-            icon: Icon(HugeIconsSolid.search01));
-      })
+            icon: Icon(HugeIconsSolid.search01),
+          );
+        },
+      ),
     ],
   );
 }

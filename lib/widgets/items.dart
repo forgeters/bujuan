@@ -1,7 +1,9 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:bujuan_music/widgets/backdrop.dart';
 import 'package:bujuan_music/widgets/cache_image.dart';
 import 'package:bujuan_music_api/api/recommend/entity/recommend_resource_entity.dart';
 import 'package:bujuan_music_api/api/top/entity/top_artist_entity.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -59,39 +61,30 @@ class MediaItemWidget extends StatelessWidget {
 
 class AlbumItem extends StatelessWidget {
   final RecommendResourceRecommend album;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
-  const AlbumItem({super.key, required this.album, required this.onTap});
+  const AlbumItem({super.key, required this.album, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Container(
-        margin: const EdgeInsets.only(right: 15),
-        width: 138.w,
-        child: InkWell(
-          onTap: onTap,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CachedImage(
-                imageUrl: album.picUrl ?? '',
-                width: 138,
-                height: 138,
-                pWidth: 300,
-                pHeight: 300,
-                borderRadius: 20,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                album.name ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-            ],
-          ),
+    return Container(
+      alignment: Alignment.bottomCenter,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: CachedNetworkImageProvider('${album.picUrl}?param=280y280'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: BackdropView(
+        width: double.infinity,
+        color: Theme.of(context).scaffoldBackgroundColor.withAlpha(180),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.w),
+        child: Text(
+          album.name ?? '',
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.clip,
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.sp),
         ),
       ),
     );
@@ -100,41 +93,34 @@ class AlbumItem extends StatelessWidget {
 
 class ArtistItem extends StatelessWidget {
   final TopArtistArtists album;
-  final VoidCallback onTap;
 
-  const ArtistItem({super.key, required this.album, required this.onTap});
+  const ArtistItem({super.key, required this.album});
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Container(
-        margin: const EdgeInsets.only(right: 15),
-        width: 138,
-        child: InkWell(
-          onTap: onTap,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CachedImage(
-                imageUrl: album.picUrl ?? '',
-                width: 88.w,
-                height: 88.w,
-                pHeight: 200,
-                pWidth: 200,
-                borderRadius: 44.w,
-                fit: BoxFit.cover,
+    return Column(
+      children: [
+        Container(
+          constraints: BoxConstraints(maxWidth: 88.w, maxHeight: 88.w),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: CachedNetworkImageProvider(
+                '${album.picUrl}?param=280y280',
               ),
-              const SizedBox(height: 3),
-              Text(
-                album.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:  TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-              ),
-            ],
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(40.w),
           ),
         ),
-      ),
+        SizedBox(height: 3.w),
+        Text(
+          album.name,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          softWrap: false,
+          style: TextStyle(fontSize: 12.sp),
+        ),
+      ],
     );
   }
 }

@@ -1,68 +1,55 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:bujuan_music_api/api/recommend/entity/recommend_new_song_entity.dart';
 import 'package:bujuan_music_api/api/recommend/entity/recommend_resource_entity.dart';
-import 'package:bujuan_music_api/api/song/entity/new_song_entity.dart';
+import 'package:bujuan_music_api/api/recommend/entity/recommend_song_entity.dart';
 import 'package:bujuan_music_api/api/top/entity/top_artist_entity.dart';
 import 'package:bujuan_music_api/bujuan_music_api.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'provider.g.dart';
 
-// @riverpod
-// Future<HomeData> newAlbum(Ref ref) async {
-//   var recommendResourceFuture = BujuanMusicManager().recommendResource();
-//   var recommendSongsFuture = BujuanMusicManager().newSongs();
-//   var topArtistFuture = BujuanMusicManager().topArtist(limit: 10);
-//   var list = await Future.wait([recommendResourceFuture, topArtistFuture, recommendSongsFuture]);
-//   var listArtist = list[1] as TopArtistEntity;
-//   var songEntity = list[2] as NewSongEntity;
-//   var songs = (songEntity.data ?? []);
-//   return HomeData(
-//       list[0] as RecommendResourceEntity,
-//       listArtist,
-//       (songs.length > 20 ? songs.sublist(0, 20) : songs)
-//           .map((e) => MediaItem(
-//               id: '${e.id}',
-//               title: e.name ?? "",
-//               duration: Duration(milliseconds: e.duration ?? 0),
-//               artist: (e.artists ?? []).map((e) => e.name).toList().join(' '),
-//               artUri: Uri.parse(e.album?.picUrl ?? ''),
-//               extras: {'mv': e.mvid ?? 0}))
-//           .toList());
-// }
 @riverpod
 Future<HomeData> newAlbum(Ref ref) async {
   var recommendResourceFuture = BujuanMusicManager().recommendResource();
-  var recommendSongsFuture = BujuanMusicManager().newSongs();
+  var songsFuture = BujuanMusicManager().recommendNewSong(limit: 30);
   var topArtistFuture = BujuanMusicManager().topArtist(limit: 10);
+  var recommendSongFuture = BujuanMusicManager().recommendSongs();
 
-  var list = await Future.wait([recommendResourceFuture, topArtistFuture, recommendSongsFuture]);
-  // return HomeData(list[0] as RecommendResourceEntity, list[1] as TopArtistEntity, []);
-  //
+  var list = await Future.wait([
+    recommendResourceFuture,
+    topArtistFuture,
+    songsFuture,
+    recommendSongFuture,
+  ]);
   return compute(_buildHomeData, list);
 }
 
 HomeData _buildHomeData(List list) {
+  var playlist = list[0] as RecommendResourceEntity;
   var listArtist = list[1] as TopArtistEntity;
-  var songEntity = list[2] as NewSongEntity;
-  var songs = songEntity.data ?? [];
+  var songEntity = list[2] as RecommendNewSongEntity;
+  var recommendSongEntity = list[3] as RecommendSongEntity;
+  var songs = songEntity.result ?? [];
 
+  var medias = songs
+      .map(
+        (e) => MediaItem(
+          id: '${e.id}',
+          title: e.name ?? "",
+          duration: Duration(milliseconds: e.song?.duration ?? 0),
+          artist: (e.song?.artists ?? []).map((e) => e.name).toList().join(' '),
+          artUri: Uri.parse(e.song?.album?.picUrl ?? ''),
+          extras: {'mv': e.song?.mvid ?? 0},
+        ),
+      )
+      .toList();
+  var recommend = recommendSongEntity.data?.dailySongs ?? [];
   return HomeData(
-    list[0] as RecommendResourceEntity,
+    playlist,
     listArtist,
-    (songs.length > 20 ? songs.sublist(0, 20) : songs)
-        .map(
-          (e) => MediaItem(
-            id: '${e.id}',
-            title: e.name ?? "",
-            duration: Duration(milliseconds: e.duration ?? 0),
-            artist: (e.artists ?? []).map((e) => e.name).toList().join(' '),
-            artUri: Uri.parse(e.album?.picUrl ?? ''),
-            extras: {'mv': e.mvid ?? 0},
-          ),
-        )
-        .toList(),
+    medias,
+    recommend.isEmpty ? '' : recommend.first.al?.picUrl ?? '',
   );
 }
 
@@ -89,6 +76,7 @@ class HomeData {
   RecommendResourceEntity recommendResourceEntity;
   TopArtistEntity topArtistEntity;
   List<MediaItem> medias;
+  String image;
 
-  HomeData(this.recommendResourceEntity, this.topArtistEntity, this.medias);
+  HomeData(this.recommendResourceEntity, this.topArtistEntity, this.medias, this.image);
 }

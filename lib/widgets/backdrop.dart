@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class BackdropView extends StatelessWidget {
+class BackdropView extends ConsumerWidget {
+  static final ImageFilter _kBlurSigma8 = ImageFilter.blur(sigmaX: 8, sigmaY: 8);
   final BorderRadius? borderRadius;
   final BoxDecoration? decoration;
   final double? width;
@@ -32,17 +34,13 @@ class BackdropView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     var theme = Theme.of(context);
-    if (!blur) {
-      return _buildContent(theme);
-    }
+    final content = _buildContent(theme);
+    if (!blur) return content;
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(0.w),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), //
-        child: _buildContent(theme),
-      ),
+      child: BackdropFilter(filter: _kBlurSigma8, child: content),
     );
   }
 
@@ -58,10 +56,18 @@ class BackdropView extends StatelessWidget {
             gradient: gradient,
             color: gradient != null
                 ? null
-                : color ?? (theme.scaffoldBackgroundColor.withAlpha(blur?140:255)),
+                : color ?? (theme.scaffoldBackgroundColor.withAlpha(blur ? 140 : 255)),
             // 半透明背景
             borderRadius: borderRadius ?? BorderRadius.circular(30.w),
-            border: border ?? Border.all(color: Color(0XFF1ED760).withAlpha(10), width: 1.2.w),
+            border: border ?? Border.all(color: Colors.grey.withAlpha(10), width: 1.2.w),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withAlpha(30), // 阴影颜色（很关键）
+                blurRadius: 20,                    // 模糊程度
+                spreadRadius: 0,                   // 扩散
+                offset: const Offset(0, 8),        // Y 轴偏移
+              ),
+            ],
           ),
       child: RepaintBoundary(child: child),
     );

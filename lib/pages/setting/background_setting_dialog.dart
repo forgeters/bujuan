@@ -1,11 +1,7 @@
-import 'package:bujuan_music/common/values/app_config.dart';
 import 'package:bujuan_music/common/values/app_images.dart';
-import 'package:bujuan_music/pages/main/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 class BackgroundSettingDialog extends StatefulWidget {
   const BackgroundSettingDialog({super.key});
@@ -88,33 +84,6 @@ class _BackgroundSettingDialogState extends State<BackgroundSettingDialog> {
                               ],
                             ),
                             SizedBox(height: 20.w),
-                            Consumer(builder: (c, ref, child) {
-                              var watch = ref.watch(backgroundModeNotifierProvider);
-                              var backgroundModeNotifier =
-                                  ref.read(backgroundModeNotifierProvider.notifier);
-                              var themeModeNotifier = ref.read(themeModeNotifierProvider.notifier);
-                              return GestureDetector(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 15.w, horizontal: 40.w),
-                                  decoration: BoxDecoration(
-                                      color: Color(0XFF1ED760)
-                                          .withAlpha(watch == background.background ? 160 : 100),
-                                      borderRadius: BorderRadius.circular(30.w)),
-                                  child: Text(
-                                    watch == background.background ? 'Selected' : 'Click to select',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                                onTap: () {
-                                  backgroundModeNotifier.changeBackground(background.background);
-                                  themeModeNotifier.setTheme(background.themeMode);
-                                  var isDark = background.themeMode == ThemeMode.dark;
-                                  setValue(AppConfig.isDarkTheme, isDark);
-                                  // GetIt.I<Box>()
-                                  //     .put(AppConfig.backgroundPath, background.background);
-                                },
-                              );
-                            })
                           ],
                         ))
                     .toList(),

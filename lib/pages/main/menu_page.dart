@@ -25,7 +25,7 @@ class MobileMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var currentPath = ref.watch(currentRouterPathProvider);
-    var theme = ref.watch(themeModeNotifierProvider);
+    var theme = ref.watch(themeModeProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -80,7 +80,7 @@ class MobileMenu extends ConsumerWidget {
                 : HugeIconsStroke.moon01,
           ),
           title: Text('Theme Mode'),
-          onTap: () => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
+          onTap: () => ref.read(themeModeProvider.notifier).toggleTheme(),
         )
       ],
     );

@@ -11,10 +11,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
 import 'package:image_pixels/image_pixels.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 import '../../common/bujuan_music_handler_mediakit.dart';
 import '../../utils/adaptive_screen_utils.dart';
-import '../../widgets/loading.dart';
 
 class PlaylistPage extends ConsumerWidget {
   final int id;
@@ -25,13 +25,11 @@ class PlaylistPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     bool desktop = medium(context) || expanded(context);
     final album = ref.watch(playlistDetailProvider(id));
-    return Scaffold(
-      body: album.when(
-        data: (details) =>
-            desktop ? DesktopPlayList(details: details) : MobilePlayList(details: details),
-        loading: () => const Center(child: LoadingIndicator()),
-        error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
-      ),
+    return album.when(
+      data: (details) =>
+          desktop ? DesktopPlayList(details: details) : MobilePlayList(details: details),
+      loading: () => const Center(child: LoadingIndicatorM3E()),
+      error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
     );
   }
 }
@@ -82,7 +80,7 @@ class MobilePlayList extends StatelessWidget {
                 title: Text(
                   details.detail.playlist?.name ?? '',
                   maxLines: 1,
-                  style: TextStyle(fontSize: 18.sp,color: IconTheme.of(context).color),
+                  style: TextStyle(fontSize: 18.sp, color: IconTheme.of(context).color),
                 ),
                 background: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -103,7 +101,9 @@ class MobilePlayList extends StatelessWidget {
           ],
           body: ListView.builder(
             physics: NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.only(bottom: 68.w + of.padding.bottom / (Platform.isAndroid ? 1 : 1.5)),
+            padding: EdgeInsets.only(
+              bottom: 68.w + of.padding.bottom / (Platform.isAndroid ? 1 : 1.5),
+            ),
             itemCount: details.medias.length,
             itemExtent: 75,
             itemBuilder: (context, index) => MediaItemWidget(
@@ -115,7 +115,7 @@ class MobilePlayList extends StatelessWidget {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

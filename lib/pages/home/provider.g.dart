@@ -6,40 +6,78 @@ part of 'provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$newAlbumHash() => r'5a8df7614efa40593729aaddf1a67ba1ca124a27';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [newAlbum].
 @ProviderFor(newAlbum)
-final newAlbumProvider = AutoDisposeFutureProvider<HomeData>.internal(
-  newAlbum,
-  name: r'newAlbumProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$newAlbumHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const newAlbumProvider = NewAlbumProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef NewAlbumRef = AutoDisposeFutureProviderRef<HomeData>;
-String _$recommendSongsHash() => r'a095ca7deb5c0a1c1e9c5b205557d9366e6bffda';
+final class NewAlbumProvider
+    extends
+        $FunctionalProvider<AsyncValue<HomeData>, HomeData, FutureOr<HomeData>>
+    with $FutureModifier<HomeData>, $FutureProvider<HomeData> {
+  const NewAlbumProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'newAlbumProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
-/// See also [recommendSongs].
+  @override
+  String debugGetCreateSourceHash() => _$newAlbumHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<HomeData> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<HomeData> create(Ref ref) {
+    return newAlbum(ref);
+  }
+}
+
+String _$newAlbumHash() => r'1992313ea4437214f0493bc12c4ccb4650c7e433';
+
 @ProviderFor(recommendSongs)
-final recommendSongsProvider =
-    AutoDisposeFutureProvider<List<MediaItem>>.internal(
-      recommendSongs,
-      name: r'recommendSongsProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$recommendSongsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+const recommendSongsProvider = RecommendSongsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RecommendSongsRef = AutoDisposeFutureProviderRef<List<MediaItem>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class RecommendSongsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<MediaItem>>,
+          List<MediaItem>,
+          FutureOr<List<MediaItem>>
+        >
+    with $FutureModifier<List<MediaItem>>, $FutureProvider<List<MediaItem>> {
+  const RecommendSongsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'recommendSongsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$recommendSongsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<MediaItem>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<MediaItem>> create(Ref ref) {
+    return recommendSongs(ref);
+  }
+}
+
+String _$recommendSongsHash() => r'a095ca7deb5c0a1c1e9c5b205557d9366e6bffda';

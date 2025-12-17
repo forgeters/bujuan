@@ -1,4 +1,3 @@
-import 'package:bujuan_music/pages/main/provider.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
 
 import '../../pages/main/main_page.dart';
@@ -6,6 +5,7 @@ import '../../router/app_router.dart';
 
 class AppConfig {
   static const String isDarkTheme = 'isDarkTheme';
+  static const String isFloatBottom = 'isFloatBottom';
   static const String backgroundPath = 'backgroundPath';
 
   static final List<BottomData> bottomItems = [

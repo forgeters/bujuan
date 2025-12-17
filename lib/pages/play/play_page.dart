@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bujuan_music/utils/time_utils.dart';
 import 'package:bujuan_music/widgets/cache_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_m3shapes/flutter_m3shapes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
@@ -15,9 +16,8 @@ import '../main/provider.dart';
 
 class PlayPage extends StatelessWidget {
   final ScrollController scrollController;
-  final double panelPosition;
 
-  const PlayPage({super.key, required this.scrollController, required this.panelPosition});
+  const PlayPage({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +25,11 @@ class PlayPage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Positioned(bottom: 0, child: RepaintBoundary(child: PlayBackgroundStyle1())),
+          Positioned(bottom: 0, child: RepaintBoundary(child: const PlayBackgroundStyle1())),
           ListView(
             controller: scrollController,
             children: [
-              RepaintBoundary(child: MusicControlsSection()),
+              RepaintBoundary(child: const MusicControlsSection()),
               // SizedBox(
               //   height: 500.w,
               //   child: LyricWidget(),
@@ -79,12 +79,34 @@ class MusicControlsSection extends StatelessWidget {
 }
 
 /// 音乐进度条
-class MusicProgressBar extends ConsumerWidget {
+class MusicProgressBar extends StatelessWidget {
   const MusicProgressBar({super.key});
 
   @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 30.w,
+          child: const RepaintBoundary(child: _WaveformConsumer()),
+        ),
+        SizedBox(height: 8.w),
+        RepaintBoundary(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [_CurrentPositionText(), _DurationText()],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WaveformConsumer extends ConsumerWidget {
+  const _WaveformConsumer();
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Optimize provider selectors to reduce rebuilds
     final position = ref.watch(
       playbackStateProvider.select((state) => state.value?.updatePosition.inMilliseconds ?? 0),
     );
@@ -92,45 +114,49 @@ class MusicProgressBar extends ConsumerWidget {
       mediaItemProvider.select((state) => state.value?.duration?.inMilliseconds ?? 0),
     );
     final progress = (duration > 0) ? position / duration : 0.0;
-    final positionDuration = TimeUtils.formatDuration(position ~/ 1000);
-    final durationDuration = TimeUtils.formatDuration(duration ~/ 1000);
 
-    return Column(
-      children: [
-        SizedBox(
-          height: 30.w,
-          child: RepaintBoundary(
-            child: WaveformProgressWidget(
-              progress: progress,
-              min: 0,
-              max: 1,
-              playedColor: IconTheme.of(context).color ?? Colors.grey,
-              unplayedColor: (IconTheme.of(context).color ?? Colors.grey).withAlpha(180),
-              // thumbColor: Colors.transparent,
-              onChangeEnd: (value) {
-                final seekTo = Duration(milliseconds: (duration * value).toInt());
-                BujuanMusicHandler().seek(seekTo);
-              },
-            ),
-          ),
-        ),
-        SizedBox(height: 8.w),
-        RepaintBoundary(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                positionDuration,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
-              ),
-              Text(
-                durationDuration,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return WaveformProgressWidget(
+      progress: progress,
+      min: 0,
+      max: 1,
+      playedColor: IconTheme.of(context).color ?? Colors.grey,
+      unplayedColor: (IconTheme.of(context).color ?? Colors.grey).withAlpha(180),
+      onChangeEnd: (value) {
+        final seekTo = Duration(milliseconds: (duration * value).toInt());
+        BujuanMusicHandler().seek(seekTo);
+      },
+    );
+  }
+}
+
+class _CurrentPositionText extends ConsumerWidget {
+  const _CurrentPositionText();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final position = ref.watch(
+      playbackStateProvider.select((state) => state.value?.updatePosition.inMilliseconds ?? 0),
+    );
+    final positionDuration = TimeUtils.formatDuration(position ~/ 1000);
+    return Text(
+      positionDuration,
+      style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+    );
+  }
+}
+
+class _DurationText extends ConsumerWidget {
+  const _DurationText();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final duration = ref.watch(
+      mediaItemProvider.select((state) => state.value?.duration?.inMilliseconds ?? 0),
+    );
+    final durationDuration = TimeUtils.formatDuration(duration ~/ 1000);
+    return Text(
+      durationDuration,
+      style: TextStyle(fontSize: 14.sp, color: Colors.grey),
     );
   }
 }
@@ -204,11 +230,16 @@ class AlbumWidget extends ConsumerWidget {
     return Column(
       children: [
         RepaintBoundary(
-          child: CachedImage(
-            imageUrl: media?.artUri?.toString() ?? '',
-            width: 280.w,
-            height: 280.w,
-            borderRadius: 30.w,
+          child: M3Container.c9SidedCookie(
+            width: 300.w,
+            height: 300.w,
+            child: CachedImage(
+              imageUrl: media?.artUri?.toString() ?? '',
+              width: 300.w,
+              height: 300.w,
+              pWidth: 500,
+              pHeight: 500,
+            ),
           ),
         ),
         SizedBox(height: 40.w),

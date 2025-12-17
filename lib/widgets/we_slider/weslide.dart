@@ -190,13 +190,11 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
   // Panel Border Radius Effect[Tween]
   late Animation<double> _panelBorderRadius;
 
-
   // Scale Animation Effect [Tween]
   late Animation<double> _scaleAnimation;
 
   // PanelHeader animation Effect [Tween]
   late Animation<double> _fadeAnimation;
-  late Animation<double> _fadeAnimation1;
 
   // Footer Animation Controller
   late AnimationController _acFooter;
@@ -250,14 +248,12 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     ).animate(_ac);
     // body border radius animation
 
-
     _scaleAnimation = Tween<double>(
       begin: widget.transformScaleBegin,
       end: widget.transformScaleEnd,
     ).animate(_ac);
     // Fade Animation sequence
     _fadeAnimation = TweenSequence(widget.fadeSequence).animate(_ac);
-    _fadeAnimation1 = TweenSequence(panelFadeSequence).animate(_ac);
 
     if (widget.panelBuilder != null) {
       _panelScrollController = ScrollController();
@@ -441,14 +437,13 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     return location;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final bottom = MediaQuery.of(context).padding.bottom <= 0
         ? 8.w
-        : MediaQuery.of(context).padding.bottom / (Platform.isAndroid ? 1 : 1.5);
+        : MediaQuery.of(context).padding.bottom / (Platform.isAndroid ? 1.2 : 1.6);
     final double panelPadBase = 60.w; // 面板内容顶部基础间距常量
 
     return Container(
@@ -605,6 +600,11 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                   child: AnimatedBuilder(
                     animation: _mergedAnimations,
                     builder: (context, child) {
+                      // Lazy rendering: if panel is closed, do not render body
+                      if (_ac.value <= 1e-2 && _ac.status != AnimationStatus.forward) {
+                        return const SizedBox.shrink();
+                      }
+
                       final double dynamicTop =
                           (panelPadBase + (1 - _acFooter.value) * bottom) * (1 - _ac.value);
                       return Padding(
@@ -612,18 +612,15 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                         child: child,
                       );
                     },
-                    child: FadeTransition(
-                      opacity: _fadeAnimation1,
-                      child: widget.panelBuilder != null
-                          ? PrimaryScrollController(
-                              controller: _panelScrollController!,
-                              child: IgnorePointer(
-                                ignoring: _closingInProgress,
-                                child: widget.panelBuilder!(_panelScrollController!, _ac.value),
-                              ),
-                            )
-                          : widget.panel!,
-                    ),
+                    child: widget.panelBuilder != null
+                        ? PrimaryScrollController(
+                            controller: _panelScrollController!,
+                            child: IgnorePointer(
+                              ignoring: _closingInProgress,
+                              child: widget.panelBuilder!(_panelScrollController!, _ac.value),
+                            ),
+                          )
+                        : widget.panel!,
                   ),
                 ),
                 /** Panel Header widget **/

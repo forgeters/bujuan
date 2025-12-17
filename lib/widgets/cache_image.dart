@@ -1,6 +1,7 @@
 import 'package:bujuan_music/widgets/loading.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons_pro/hugeicons.dart';
 
 class CachedImage extends StatelessWidget {
   final String imageUrl;
@@ -29,6 +30,20 @@ class CachedImage extends StatelessWidget {
   //唱片机
   @override
   Widget build(BuildContext context) {
+    if (borderRadius == 0) {
+      return imageUrl.isEmpty
+          ? Container(height: height, width: width, color: Colors.grey.withAlpha(140))
+          : CachedNetworkImage(
+              imageUrl: '$imageUrl?param=${pWidth}y$pHeight',
+              width: width,
+              height: height,
+              fit: fit,
+              placeholder: (context, url) => placeholder ?? _defaultPlaceholder(),
+              errorWidget: (context, url, error) => errorWidget ?? _defaultErrorWidget(),
+              fadeInDuration: const Duration(milliseconds: 300),
+              fadeOutDuration: const Duration(milliseconds: 200),
+            );
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: imageUrl.isEmpty
@@ -51,7 +66,7 @@ class CachedImage extends StatelessWidget {
       width: width,
       height: height,
       color: Colors.grey.shade200,
-      child: LoadingIndicator(size: Size((width ?? 0) / 3, (width ?? 0) / 3)),
+      child: Icon(HugeIconsStroke.image01),
     );
   }
 

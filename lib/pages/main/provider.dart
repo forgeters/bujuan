@@ -3,7 +3,6 @@ import 'package:bujuan_music/common/values/app_config.dart';
 import 'package:bujuan_music_api/api/user/entity/user_info_entity.dart';
 import 'package:bujuan_music_api/common/music_api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

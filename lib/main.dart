@@ -92,7 +92,7 @@ class MyApp extends ConsumerWidget {
       designSize: size,
       builder: (_, __) => Consumer(
         builder: (_, ref, __) {
-          final themeMode = ref.watch(themeModeNotifierProvider);
+          final themeMode = ref.watch(themeModeProvider);
           return AnnotatedRegion(
             value: SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
@@ -104,8 +104,6 @@ class MyApp extends ConsumerWidget {
               title: 'Bujuan',
               themeMode: themeMode,
               darkTheme: AppTheme.dark,
-              // showPerformanceOverlay: true,
-              // checkerboardOffscreenLayers: true,
               theme: AppTheme.light,
               routerConfig: router,
             ),
@@ -115,3 +113,4 @@ class MyApp extends ConsumerWidget {
     );
   }
 }
+
