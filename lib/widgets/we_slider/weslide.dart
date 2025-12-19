@@ -22,7 +22,8 @@ class WeSlide extends StatefulWidget {
   /// Builds a scrollable panel and provides a [ScrollController]
   /// and current panel position (0.0~1.0). If both [panel] and
   /// [panelBuilder] are provided, [panelBuilder] takes precedence.
-  final Widget Function(ScrollController controller, double panelPosition)? panelBuilder;
+  final Widget Function(ScrollController controller, double panelPosition)?
+  panelBuilder;
 
   /// 面板头部（位于面板内容之上）
   final Widget? panelHeader;
@@ -161,12 +162,21 @@ class WeSlide extends StatefulWidget {
        assert(footerHeight >= 0.0, 'footerHeight cannot be negative'),
        assert(appBarHeight >= 0.0, 'appBarHeight cannot be negative'),
        assert(panel != null || panelBuilder != null, 'panel could not be null'),
-       assert(panelMaxSize >= panelMinSize, 'panelMaxSize cannot be less than panelMinSize'),
+       assert(
+         panelMaxSize >= panelMinSize,
+         'panelMaxSize cannot be less than panelMinSize',
+       ),
        fadeSequence =
            fadeSequence ??
            [
-             TweenSequenceItem<double>(weight: 1.0, tween: Tween(begin: 1, end: 0)),
-             TweenSequenceItem<double>(weight: 8.0, tween: Tween(begin: 0, end: 0)),
+             TweenSequenceItem<double>(
+               weight: 1.0,
+               tween: Tween(begin: 1, end: 0),
+             ),
+             TweenSequenceItem<double>(
+               weight: 8.0,
+               tween: Tween(begin: 0, end: 0),
+             ),
            ] {
     assert(dragSensitivity > 0, 'dragSensitivity must be greater than zero');
     if (controller == null) {
@@ -215,10 +225,12 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
 
   // Check if panel is visible
   bool get _isPanelVisible =>
-      _ac.status == AnimationStatus.completed || _ac.status == AnimationStatus.forward;
+      _ac.status == AnimationStatus.completed ||
+      _ac.status == AnimationStatus.forward;
 
   bool get _isFooterVisible =>
-      _acFooter.status == AnimationStatus.completed || _acFooter.status == AnimationStatus.forward;
+      _acFooter.status == AnimationStatus.completed ||
+      _acFooter.status == AnimationStatus.forward;
   List<TweenSequenceItem<double>> panelFadeSequence = [
     TweenSequenceItem<double>(weight: 1.0, tween: Tween(begin: 0, end: 0)),
     TweenSequenceItem<double>(weight: 9.0, tween: Tween(begin: 1, end: 1)),
@@ -294,7 +306,8 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
   }
 
   void _syncScrollCaptureState() {
-    if (_panelScrollController == null || !_panelScrollController!.hasClients) return;
+    if (_panelScrollController == null || !_panelScrollController!.hasClients)
+      return;
     final pos = _panelScrollController!.position;
     final atTop = pos.pixels <= pos.minScrollExtent + 0.5;
     _shouldCapturePanelDrag = atTop;
@@ -373,18 +386,6 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     _activeIntercept = false;
   }
 
-  // Get Body Animation [Paralax]
-  Animation<Offset> _getAnimationOffSet({required double minSize, required double maxSize}) {
-    final closedPercentage = (widget.panelMaxSize - minSize) / widget.panelMaxSize;
-
-    final openPercentage = (widget.panelMaxSize - maxSize) / widget.panelMaxSize;
-
-    return Tween<Offset>(
-      begin: Offset(0.0, closedPercentage),
-      end: Offset(0.0, openPercentage),
-    ).animate(_ac);
-  }
-
   //Get Panel size
   double _getPanelSize() {
     var size = 0.0;
@@ -411,7 +412,9 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
 
   double _getFooterOffset() {
     var height = widget.footerHeight;
-    final offset = widget.hideFooter ? (_ac.value * -height + (1 - _acFooter.value) * -height) : .0;
+    final offset = widget.hideFooter
+        ? (_ac.value * -height + (1 - _acFooter.value) * -height)
+        : .0;
     if (offset < -height) {
       return -height;
     } else if (offset > height) {
@@ -432,7 +435,10 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
 
     /* if paralax*/
     if (widget.parallax) {
-      location += _ac.value * (widget.panelMaxSize - widget.panelMinSize) * -widget.parallaxOffset;
+      location +=
+          _ac.value *
+          (widget.panelMaxSize - widget.panelMinSize) *
+          -widget.parallaxOffset;
     }
     return location;
   }
@@ -443,7 +449,8 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
     final width = MediaQuery.of(context).size.width;
     final bottom = MediaQuery.of(context).padding.bottom <= 0
         ? 8.w
-        : MediaQuery.of(context).padding.bottom / (Platform.isAndroid ? 1.2 : 1.6);
+        : MediaQuery.of(context).padding.bottom /
+              (Platform.isAndroid ? 1.2 : 1.6);
     final double panelPadBase = 60.w; // 面板内容顶部基础间距常量
 
     return Container(
@@ -457,15 +464,20 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
             animation: Listenable.merge([_ac, _acFooter]),
             builder: (context, child) {
               return Positioned(
-                top: _getBodyLocation(),
-                child: Transform.scale(
-                  scale: widget.transformScale ? _scaleAnimation.value : 1.0,
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    height: height,
-                    // height: height,
-                    width: widget.bodyWidth ?? width,
-                    child: RepaintBoundary(child: child),
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Transform.translate(
+                  offset: Offset(0, _getBodyLocation()),
+                  child: Transform.scale(
+                    scale: widget.transformScale ? _scaleAnimation.value : 1.0,
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      height: height,
+                      width: widget.bodyWidth ?? width,
+                      child: RepaintBoundary(child: child),
+                    ),
                   ),
                 ),
               );
@@ -489,12 +501,20 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
           AnimatedBuilder(
             animation: _mergedAnimations,
             builder: (_, child) {
-              return SlideTransition(
-                position: _getAnimationOffSet(
-                  maxSize: _getPanelLocation(),
-                  minSize:
-                      widget.panelMinSize + _getFooterOffset() + (1 - _acFooter.value) * bottom,
-                ),
+              // Calculate panel vertical offset manually to avoid object allocation (Tween)
+              final double minSize =
+                  widget.panelMinSize +
+                  _getFooterOffset() +
+                  (1 - _acFooter.value) * bottom;
+              final double maxSize = _getPanelLocation();
+              // Interpolate between closed offset (panelMaxSize - minSize) and open offset (panelMaxSize - maxSize)
+              final double closedOffset = widget.panelMaxSize - minSize;
+              final double openOffset = widget.panelMaxSize - maxSize;
+              final double currentOffset =
+                  closedOffset * (1 - _ac.value) + openOffset * _ac.value;
+
+              return Transform.translate(
+                offset: Offset(0, currentOffset),
                 child: Listener(
                   onPointerDown: (e) {
                     _activeIntercept = false;
@@ -516,7 +536,8 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                         // upward: open panel if not fully open
                         if (!isOpen) {
                           _activeIntercept = true;
-                          final fractionDragged = e.delta.dy / widget.panelMaxSize;
+                          final fractionDragged =
+                              e.delta.dy / widget.panelMaxSize;
                           _ac.value -= widget.dragSensitivity * fractionDragged;
                           return;
                         }
@@ -526,7 +547,8 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                         // downward: close panel only when inner list at top
                         if (atTop && !isClosed) {
                           _activeIntercept = true;
-                          final fractionDragged = e.delta.dy / widget.panelMaxSize;
+                          final fractionDragged =
+                              e.delta.dy / widget.panelMaxSize;
                           _ac.value -= widget.dragSensitivity * fractionDragged;
                           return;
                         }
@@ -540,7 +562,10 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                       if (!_activeIntercept) return;
                       double velocity = 0.0;
                       if (_dySamples.isNotEmpty) {
-                        final double dySum = _dySamples.fold(0.0, (a, b) => a + b);
+                        final double dySum = _dySamples.fold(
+                          0.0,
+                          (a, b) => a + b,
+                        );
                         final Duration start = _timeSamples.first;
                         final Duration end = _timeSamples.last;
                         final int dtMs = (end - start).inMilliseconds.abs();
@@ -554,10 +579,14 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                             .then((_) => _effectiveController.value = false)
                             .whenComplete(() => _closingInProgress = false);
                       } else if (velocity < -flingThreshold) {
-                        _ac.forward().then((_) => _effectiveController.value = true);
+                        _ac.forward().then(
+                          (_) => _effectiveController.value = true,
+                        );
                       } else {
                         if (_ac.value >= 0.5) {
-                          _ac.forward().then((_) => _effectiveController.value = true);
+                          _ac.forward().then(
+                            (_) => _effectiveController.value = true,
+                          );
                         } else {
                           _closingInProgress = true;
                           _ac
@@ -573,20 +602,40 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                   child: SizedBox(
                     height: widget.panelMaxSize,
                     width: widget.panelWidth ?? width,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(_panelBorderRadius.value),
-                        topRight: Radius.circular(_panelBorderRadius.value),
-                      ),
-                      child: RepaintBoundary(
-                        child: widget.panelBuilder != null
-                            ? child
-                            : GestureDetector(
-                                onVerticalDragUpdate: (details) => _handleVerticalUpdate(details),
-                                onVerticalDragEnd: (details) => _handleVerticalEnd(details),
-                                child: child,
-                              ),
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final radius = _panelBorderRadius.value;
+                        if (radius <= 0) {
+                          return RepaintBoundary(
+                            child: widget.panelBuilder != null
+                                ? child
+                                : GestureDetector(
+                                    onVerticalDragUpdate: (details) =>
+                                        _handleVerticalUpdate(details),
+                                    onVerticalDragEnd: (details) =>
+                                        _handleVerticalEnd(details),
+                                    child: child,
+                                  ),
+                          );
+                        }
+                        return ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(radius),
+                            topRight: Radius.circular(radius),
+                          ),
+                          child: RepaintBoundary(
+                            child: widget.panelBuilder != null
+                                ? child
+                                : GestureDetector(
+                                    onVerticalDragUpdate: (details) =>
+                                        _handleVerticalUpdate(details),
+                                    onVerticalDragEnd: (details) =>
+                                        _handleVerticalEnd(details),
+                                    child: child,
+                                  ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -601,14 +650,16 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                     animation: _mergedAnimations,
                     builder: (context, child) {
                       // Lazy rendering: if panel is closed, do not render body
-                      if (_ac.value <= 1e-2 && _ac.status != AnimationStatus.forward) {
-                        return const SizedBox.shrink();
-                      }
+                      // if (_ac.value <= 1e-1 &&
+                      //     _ac.status != AnimationStatus.forward) {
+                      //   return const SizedBox.shrink();
+                      // }
 
                       final double dynamicTop =
-                          (panelPadBase + (1 - _acFooter.value) * bottom) * (1 - _ac.value);
-                      return Padding(
-                        padding: EdgeInsets.only(top: dynamicTop),
+                          (panelPadBase + (1 - _acFooter.value) * widget.panelMinSize) *
+                          (1 - _ac.value);
+                      return Transform.translate(
+                        offset: Offset(0, dynamicTop),
                         child: child,
                       );
                     },
@@ -617,7 +668,10 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                             controller: _panelScrollController!,
                             child: IgnorePointer(
                               ignoring: _closingInProgress,
-                              child: widget.panelBuilder!(_panelScrollController!, _ac.value),
+                              child: widget.panelBuilder!(
+                                _panelScrollController!,
+                                _ac.value,
+                              ),
                             ),
                           )
                         : widget.panel!,
@@ -632,7 +686,9 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                             valueListenable: _effectiveController,
                             builder: (_, __, ___) {
                               return IgnorePointer(
-                                ignoring: _effectiveController.value && widget.hidePanelHeader,
+                                ignoring:
+                                    _effectiveController.value &&
+                                    widget.hidePanelHeader,
                                 child: widget.panelHeader,
                               );
                             },
@@ -657,9 +713,12 @@ class WeSlideState extends State<WeSlide> with TickerProviderStateMixin {
                   builder: (context, child) {
                     return Positioned(
                       height: widget.footerHeight,
-                      bottom: _getFooterOffset(),
-                      width: MediaQuery.of(context).size.width,
-                      child: RepaintBoundary(child: widget.footer!),
+                      bottom: 0,
+                      width: width,
+                      child: Transform.translate(
+                        offset: Offset(0, -_getFooterOffset()),
+                        child: RepaintBoundary(child: widget.footer!),
+                      ),
                     );
                   },
                 )

@@ -62,6 +62,59 @@ abstract class _$ThemeModeNotifier extends $Notifier<ThemeMode> {
   }
 }
 
+@ProviderFor(DyColorNotifier)
+const dyColorProvider = DyColorNotifierProvider._();
+
+final class DyColorNotifierProvider
+    extends $NotifierProvider<DyColorNotifier, Color> {
+  const DyColorNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dyColorProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dyColorNotifierHash();
+
+  @$internal
+  @override
+  DyColorNotifier create() => DyColorNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Color value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Color>(value),
+    );
+  }
+}
+
+String _$dyColorNotifierHash() => r'8b2d3306ea29b82a35ce9082cac67d39a939ca58';
+
+abstract class _$DyColorNotifier extends $Notifier<Color> {
+  Color build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<Color, Color>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Color, Color>,
+              Color,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 @ProviderFor(BackgroundModeNotifier)
 const backgroundModeProvider = BackgroundModeNotifierProvider._();
 
@@ -404,6 +457,45 @@ final class MediaListProvider
 }
 
 String _$mediaListHash() => r'37b78805d03626b5b8d86c2798971fc3ce80665c';
+
+@ProviderFor(dynamicColor)
+const dynamicColorProvider = DynamicColorProvider._();
+
+final class DynamicColorProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ColorScheme>,
+          ColorScheme,
+          FutureOr<ColorScheme>
+        >
+    with $FutureModifier<ColorScheme>, $FutureProvider<ColorScheme> {
+  const DynamicColorProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dynamicColorProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dynamicColorHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<ColorScheme> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ColorScheme> create(Ref ref) {
+    return dynamicColor(ref);
+  }
+}
+
+String _$dynamicColorHash() => r'961e65a7697bd2334836b5051c5086f1eb2f4dd6';
 
 @ProviderFor(playbackState)
 const playbackStateProvider = PlaybackStateProvider._();

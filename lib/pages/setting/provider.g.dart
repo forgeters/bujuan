@@ -42,7 +42,7 @@ final class FloatBottomBarNotifierProvider
 }
 
 String _$floatBottomBarNotifierHash() =>
-    r'a8a072ffcd1f4769de081cdfc5af5e12a5c72aa8';
+    r'0db1f8c840383d747b2810b7e612d99fb70052d9';
 
 abstract class _$FloatBottomBarNotifier extends $Notifier<bool> {
   bool build();

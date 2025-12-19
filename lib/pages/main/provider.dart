@@ -2,11 +2,13 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bujuan_music/common/values/app_config.dart';
 import 'package:bujuan_music_api/api/user/entity/user_info_entity.dart';
 import 'package:bujuan_music_api/common/music_api.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../common/bujuan_music_handler_mediakit.dart';
+import '../../common/bujuan_music_handler.dart';
 
 part 'provider.g.dart';
 
@@ -22,6 +24,16 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
 
   void toggleTheme() {
     state = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+  }
+}
+
+@riverpod
+class DyColorNotifier extends _$DyColorNotifier {
+  @override
+  Color build() => Colors.white;
+
+  void setColor(Color color) {
+    state = color;
   }
 }
 
@@ -85,6 +97,15 @@ Stream<MediaItem?> mediaItem(Ref ref) {
 @riverpod
 Stream<List<MediaItem>> mediaList(Ref ref) {
   return BujuanMusicHandler().queue.stream;
+}
+
+@riverpod
+Future<ColorScheme> dynamicColor(Ref ref) async{
+  final artUrl = ref.watch(
+    mediaItemProvider.select((value) => value.value?.artUri?.toString() ?? ''),
+  );
+  var colorScheme = await ColorScheme.fromImageProvider(provider: CachedNetworkImageProvider('$artUrl?param=100y100'));
+  return colorScheme;
 }
 
 @riverpod

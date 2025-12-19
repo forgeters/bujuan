@@ -14,12 +14,12 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
-import 'package:media_kit/media_kit.dart';
+// import 'package:media_kit/media_kit.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'common/bujuan_music_handler_mediakit.dart';
+import 'common/bujuan_music_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,7 +65,7 @@ Future<void> initWindow() async {
 
 /// 初始化音频服务
 Future<void> initMedia() async {
-  MediaKit.ensureInitialized();
+  // MediaKit.ensureInitialized();
   final appDocDir = await getApplicationDocumentsDirectory();
   await BujuanMusicManager().init(cookiePath: '${appDocDir.path}/cookies', debug: false);
   await AudioService.init(
@@ -104,6 +104,7 @@ class MyApp extends ConsumerWidget {
               title: 'Bujuan',
               themeMode: themeMode,
               darkTheme: AppTheme.dark,
+              // showPerformanceOverlay: true,
               theme: AppTheme.light,
               routerConfig: router,
             ),

@@ -4,8 +4,10 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bujuan_music/pages/home/provider.dart';
 import 'package:bujuan_music/pages/main/phone/widgets.dart';
 import 'package:bujuan_music/router/app_router.dart';
+import 'package:bujuan_music/widgets/backdrop.dart';
 import 'package:bujuan_music/widgets/cache_image.dart';
 import 'package:bujuan_music/widgets/items.dart';
+import 'package:bujuan_music/widgets/loading.dart';
 import 'package:bujuan_music/widgets/main_appbar.dart';
 import 'package:bujuan_music_api/api/recommend/entity/recommend_resource_entity.dart';
 import 'package:bujuan_music_api/api/top/entity/top_artist_entity.dart';
@@ -13,9 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
-import '../../common/bujuan_music_handler_mediakit.dart';
+import '../../common/bujuan_music_handler.dart';
 import '../../common/values/app_images.dart';
 import '../../utils/adaptive_screen_utils.dart';
 
@@ -33,7 +34,7 @@ class HomePage extends StatelessWidget {
           return album.when(
             data: (homeData) =>
                 desktop ? DesktopHome(homeData: homeData) : MobileHome(homeData: homeData),
-            loading: () => const Center(child: LoadingIndicatorM3E()),
+            loading: () => const Center(child: LoadingIndicator()),
             error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
           );
         },
@@ -59,15 +60,6 @@ class MobileHome extends StatelessWidget {
     final songList = homeData.medias;
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15.w),
-            child: GestureDetector(
-              child: Image.asset(AppImages.banner, width: 345.w, height: 148.w, fit: BoxFit.fill),
-              onTap: () => context.push(AppRouter.today),
-            ),
-          ),
-        ),
         SliverToBoxAdapter(child: _buildTitle('推荐歌单', context, onTap: () {})),
         SliverToBoxAdapter(child: AlbumListWidget(albums: albumList)),
         SliverToBoxAdapter(child: _buildTitle('热门歌手', context, onTap: () {})),
@@ -81,6 +73,7 @@ class MobileHome extends StatelessWidget {
 
   Widget _buildSongList(List<MediaItem> songs) {
     return SliverFixedExtentList.builder(
+      addAutomaticKeepAlives: false,
       itemBuilder: (context, index) => RepaintBoundary(
         child: MediaItemWidget(
           mediaItem: songs[index],
@@ -112,7 +105,7 @@ class MobileHome extends StatelessWidget {
           if (onTap != null)
             IconButton(
               onPressed: () {},
-              icon: Text('更多',style: TextStyle(fontSize: 12.sp),),
+              icon: Text('更多', style: TextStyle(fontSize: 12.sp)),
             ),
         ],
       ),
@@ -127,7 +120,7 @@ class AlbumListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var list = List.generate(min(albums.length, 8), (index) {
+    var list = List.generate(min(albums.length, 10), (index) {
       return RepaintBoundary(child: AlbumItem(album: albums[index]));
     });
     return Container(
@@ -283,4 +276,12 @@ class DesktopHome extends StatelessWidget {
       ),
     );
   }
+}
+
+class HomeTop {
+  String name;
+  String image;
+  String tag;
+
+  HomeTop(this.name, this.image, this.tag);
 }

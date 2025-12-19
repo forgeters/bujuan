@@ -9,7 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
 
-import '../common/bujuan_music_handler_mediakit.dart';
+import '../common/bujuan_music_handler.dart';
 import '../router/app_router.dart';
 
 class MediaItemWidget extends StatelessWidget {

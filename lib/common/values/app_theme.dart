@@ -1,84 +1,54 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-/// The [AppTheme] defines light and dark themes for the app.
-///
-/// Theme setup for FlexColorScheme package v8.
-/// Use same major flex_color_scheme package version. If you use a
-/// lower minor version, some properties may not be supported.
-/// In that case, remove them after copying this theme to your
-/// app or upgrade the package to version 8.4.0.
-///
-/// Use it in a [MaterialApp] like this:
-///
-/// MaterialApp(
-///   theme: AppTheme.light,
-///   darkTheme: AppTheme.dark,
-/// );
-abstract final class AppTheme {
-  // The FlexColorScheme defined light mode ThemeData.
-  static ThemeData light = FlexThemeData.light(
-    // Playground built-in scheme made with FlexSchemeColor() API.
-    colors: const FlexSchemeColor(
-      primary: Color(0xFF00296B),
-      primaryContainer: Color(0xFFA0C2ED),
-      secondary: Color(0xFFD26900),
-      secondaryContainer: Color(0xFFFFD270),
-      tertiary: Color(0xFF5C5C95),
-      tertiaryContainer: Color(0xFFC8DBF8),
-      appBarColor: Color(0xFFC8DCF8),
-      swapOnMaterial3: true,
-    ),
-    // Component theme configurations for light mode.
-    subThemesData: const FlexSubThemesData(
-      interactionEffects: true,
-      tintedDisabledControls: true,
-      useM2StyleDividerInM3: true,
-      inputDecoratorIsFilled: true,
-      inputDecoratorBorderType: FlexInputBorderType.outline,
-      alignedDropdown: true,
-      navigationRailUseIndicator: true,
-    ),
-    // ColorScheme seed generation configuration for light mode.
-    keyColors: const FlexKeyColors(
-    ),
-    // Direct ThemeData properties.
-    visualDensity: FlexColorScheme.comfortablePlatformDensity,
-    cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
-  );
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-  // The FlexColorScheme defined dark mode ThemeData.
-  static ThemeData dark = FlexThemeData.dark(
-    // Playground built-in scheme made with FlexSchemeColor() API.
-    colors: const FlexSchemeColor(
-      primary: Color(0xFFB1CFF5),
-      primaryContainer: Color(0xFF3873BA),
-      primaryLightRef: Color(0xFF00296B), // The color of light mode primary
-      secondary: Color(0xFFFFD270),
-      secondaryContainer: Color(0xFFD26900),
-      secondaryLightRef: Color(0xFFD26900), // The color of light mode secondary
-      tertiary: Color(0xFFC9CBFC),
-      tertiaryContainer: Color(0xFF535393),
-      tertiaryLightRef: Color(0xFF5C5C95), // The color of light mode tertiary
-      appBarColor: Color(0xFF00102B),
-      swapOnMaterial3: true,
-    ),
-    // Component theme configurations for dark mode.
-    subThemesData: const FlexSubThemesData(
-      interactionEffects: true,
-      tintedDisabledControls: true,
-      blendOnColors: true,
-      useM2StyleDividerInM3: true,
-      inputDecoratorIsFilled: true,
-      inputDecoratorBorderType: FlexInputBorderType.outline,
-      alignedDropdown: true,
-      navigationRailUseIndicator: true,
-    ),
-    // ColorScheme seed configuration setup for dark mode.
-    keyColors: const FlexKeyColors(
-    ),
-    // Direct ThemeData properties.
-    visualDensity: FlexColorScheme.comfortablePlatformDensity,
-    cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
-  );
+class AppTheme {
+  static ThemeData dark = ThemeData.dark(useMaterial3: true).copyWith(
+      scaffoldBackgroundColor: Color(0xFF2C2C2C),
+      brightness: Brightness.dark,
+      // iconTheme: IconThemeData().copyWith(color: Colors.white),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedLabelStyle: TextStyle(fontSize: 12),
+          selectedIconTheme: IconThemeData(color: Color(0XFF1ED760), size: 24.sp),
+          unselectedIconTheme: IconThemeData(color: Colors.grey, size: 24.sp),
+          unselectedItemColor: Colors.grey,
+          selectedItemColor: Color(0XFF1ED760)),
+      appBarTheme: AppBarTheme(
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: Color(0xFF2C2C2C),
+          titleTextStyle:
+              TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w500),
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light,
+          )));
+  static ThemeData light = ThemeData.light(useMaterial3: true).copyWith(
+      scaffoldBackgroundColor: Colors.white,
+      listTileTheme: ListTileThemeData().copyWith(iconColor: Color(0xFF2C2C2C)),
+      brightness: Brightness.light,
+      // iconTheme: IconThemeData(color:Color(0xFF656565)),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedLabelStyle: TextStyle(fontSize: 12),
+          selectedIconTheme: IconThemeData(color: Color(0XFF1ED760), size: 24.sp),
+          unselectedIconTheme: IconThemeData(color: Color(0xFF656565), size: 24.sp),
+          unselectedItemColor: Color(0xFF656565),
+          selectedItemColor: Color(0XFF1ED760)),
+      appBarTheme: AppBarTheme(
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: Colors.white,
+          centerTitle: false,
+          titleTextStyle:
+              TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w400),
+          iconTheme: IconThemeData().copyWith(color: Colors.black),
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.dark,
+          )));
 }
+//液态

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BackdropView extends ConsumerWidget {
-  static final ImageFilter _kBlurSigma8 = ImageFilter.blur(sigmaX: 8, sigmaY: 8);
+  static final ImageFilter _kBlurSigma8 = ImageFilter.blur(sigmaX: 3, sigmaY: 3);
   final BorderRadius? borderRadius;
   final BoxDecoration? decoration;
   final double? width;
@@ -56,18 +56,18 @@ class BackdropView extends ConsumerWidget {
             gradient: gradient,
             color: gradient != null
                 ? null
-                : color ?? (theme.scaffoldBackgroundColor.withAlpha(blur ? 140 : 255)),
+                : color ?? (theme.scaffoldBackgroundColor.withAlpha(blur ? 180 : 255)),
             // 半透明背景
             borderRadius: borderRadius ?? BorderRadius.circular(30.w),
             border: border ?? Border.all(color: Colors.grey.withAlpha(10), width: 1.2.w),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withAlpha(30), // 阴影颜色（很关键）
-                blurRadius: 20,                    // 模糊程度
-                spreadRadius: 0,                   // 扩散
-                offset: const Offset(0, 8),        // Y 轴偏移
-              ),
-            ],
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.grey.withAlpha(30), // 阴影颜色（很关键）
+            //     blurRadius: 20,                    // 模糊程度
+            //     spreadRadius: 0,                   // 扩散
+            //     offset: const Offset(0, 8),        // Y 轴偏移
+            //   ),
+            // ],
           ),
       child: RepaintBoundary(child: child),
     );

@@ -2,12 +2,11 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bujuan_music/utils/time_utils.dart';
 import 'package:bujuan_music/widgets/cache_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_m3shapes/flutter_m3shapes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
-import '../../common/bujuan_music_handler_mediakit.dart';
+import '../../common/bujuan_music_handler.dart';
 import '../../widgets/wave.dart';
 import '../../widgets/we_slider/weslide_controller.dart';
 import '../main/phone/background.dart';
@@ -22,10 +21,9 @@ class PlayPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Positioned(bottom: 0, child: RepaintBoundary(child: const PlayBackgroundStyle1())),
+          Positioned(bottom: 0, child: const PlayBackgroundStyle1()),
           ListView(
             controller: scrollController,
             children: [
@@ -230,16 +228,13 @@ class AlbumWidget extends ConsumerWidget {
     return Column(
       children: [
         RepaintBoundary(
-          child: M3Container.c9SidedCookie(
-            width: 300.w,
-            height: 300.w,
-            child: CachedImage(
-              imageUrl: media?.artUri?.toString() ?? '',
-              width: 300.w,
-              height: 300.w,
-              pWidth: 500,
-              pHeight: 500,
-            ),
+          child: CachedImage(
+            imageUrl: media?.artUri?.toString() ?? '',
+            width: 280.w,
+            height: 280.w,
+            pWidth: 500,
+            pHeight: 500,
+            borderRadius: 30.w,
           ),
         ),
         SizedBox(height: 40.w),

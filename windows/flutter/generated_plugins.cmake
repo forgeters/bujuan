@@ -4,8 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
-  dynamic_color
-  media_kit_libs_windows_audio
   nb_utils
   screen_retriever_windows
   window_manager

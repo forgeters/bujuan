@@ -10,11 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons_pro/hugeicons.dart';
-import 'package:image_pixels/image_pixels.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
-import '../../common/bujuan_music_handler_mediakit.dart';
+import '../../common/bujuan_music_handler.dart';
 import '../../utils/adaptive_screen_utils.dart';
+import '../../widgets/loading.dart';
 
 class PlaylistPage extends ConsumerWidget {
   final int id;
@@ -28,7 +27,7 @@ class PlaylistPage extends ConsumerWidget {
     return album.when(
       data: (details) =>
           desktop ? DesktopPlayList(details: details) : MobilePlayList(details: details),
-      loading: () => const Center(child: LoadingIndicatorM3E()),
+      loading: () => const Center(child: LoadingIndicator()),
       error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
     );
   }
@@ -42,81 +41,104 @@ class MobilePlayList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var scaffoldBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
-    var of = MediaQuery.of(context);
-    return Stack(
-      children: [
-        ImagePixels(
-          builder: (context, img) {
-            var color = img.pixelColorAtAlignment!(Alignment.centerLeft).withAlpha(180);
-            var blend = ColorUtils.blend(color, scaffoldBackgroundColor, .7);
-            return Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [blend, scaffoldBackgroundColor],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            );
-          },
-          imageProvider: CachedNetworkImageProvider(
-            '${details.detail.playlist?.coverImgUrl ?? ''}?param=100y100',
-          ),
-        ),
-        NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              backgroundColor: Colors.transparent,
-              expandedHeight: 260.w,
-              pinned: true,
-              floating: false,
-              stretch: true,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: false,
-                collapseMode: CollapseMode.parallax,
-                titlePadding: EdgeInsets.only(left: 50.w, bottom: 16),
-                expandedTitleScale: 1,
-                title: Text(
-                  details.detail.playlist?.name ?? '',
-                  maxLines: 1,
-                  style: TextStyle(fontSize: 18.sp, color: IconTheme.of(context).color),
-                ),
-                background: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // SizedBox(height: of.padding.top ),
-                    CachedImage(
-                      imageUrl: details.detail.playlist?.coverImgUrl ?? '',
-                      width: 180.w,
-                      height: 180.w,
-                      borderRadius: 30.w,
-                      pWidth: 300,
-                      pHeight: 300,
+    var color = ColorUtils.blend(details.color, scaffoldBackgroundColor, .7);
+    Color start = color.withAlpha(30);
+    Color mid = Color.lerp(start, color, 0.5)!; // 中间颜色
+    Color end = color;
+
+    var g = LinearGradient(
+      colors: [start, mid, end],
+      stops: [0, 0.5, 0.8],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+
+    return Scaffold(
+      backgroundColor: color,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: color,
+            pinned: true,
+            expandedHeight: 305.w,
+            flexibleSpace: FlexibleSpaceBar(
+              expandedTitleScale: 1,
+              collapseMode: CollapseMode.pin, //折叠时效果
+              stretchModes: [StretchMode.zoomBackground, StretchMode.fadeTitle], //拉伸时效果
+              background: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  CachedImage(
+                    imageUrl: details.detail.playlist?.coverImgUrl ?? "",
+                    width: double.infinity,
+                    height: double.infinity,
+                    pWidth: 500,
+                    pHeight: 500,
+                  ),
+                  Container(decoration: BoxDecoration(gradient: g)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      spacing: 12.w,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                details.detail.playlist?.name ?? "",
+                                style: TextStyle(fontSize: 24.sp),
+                              ),
+                            ),
+                            SizedBox(width: 20.w),
+                            IconButton(
+                              onPressed: () {},
+                              icon: Icon(HugeIconsSolid.play, size: 25.sp),
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(ColorUtils.blend(details.color, scaffoldBackgroundColor, .4)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(onPressed: (){}, icon: Icon(HugeIconsStroke.favourite)),
+                            IconButton(onPressed: (){}, icon: Icon(HugeIconsStroke.lookTop)),
+                            IconButton(onPressed: (){}, icon: Icon(HugeIconsStroke.message01)),
+                            IconButton(onPressed: (){}, icon: Icon(HugeIconsStroke.listSetting)),
+                          ],
+                        )
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-          body: ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.only(
-              bottom: 68.w + of.padding.bottom / (Platform.isAndroid ? 1 : 1.5),
-            ),
-            itemCount: details.medias.length,
-            itemExtent: 75,
-            itemBuilder: (context, index) => MediaItemWidget(
-              mediaItem: details.medias[index],
-              onTap: () => BujuanMusicHandler().updateQueue(
-                details.medias,
-                index: index,
-                queueName: details.detail.playlist?.name ?? "",
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-      ],
+          SliverFixedExtentList(
+            itemExtent: 75,
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return RepaintBoundary(
+                  child: MediaItemWidget(
+                    mediaItem: details.medias[index],
+                    onTap: () => BujuanMusicHandler().updateQueue(
+                      details.medias,
+                      index: index,
+                      queueName: details.detail.playlist?.name ?? "",
+                    ),
+                  ),
+                );
+              },
+              childCount: details.medias.length,
+              addAutomaticKeepAlives: false,
+            ),
+          ),
+          // Add some padding at the bottom (for footer)
+          SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom + 80.w)),
+        ],
+      ),
     );
   }
 }

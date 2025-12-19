@@ -1,10 +1,11 @@
 import 'package:bujuan_music/pages/user/provider.dart';
+import 'package:bujuan_music/widgets/backdrop.dart';
+import 'package:bujuan_music/widgets/loading.dart';
 import 'package:bujuan_music/widgets/main_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 import '../../router/app_router.dart';
 import '../../utils/adaptive_screen_utils.dart';
@@ -21,7 +22,7 @@ class UserPage extends ConsumerWidget {
     return album.when(
       data: (playlist) =>
           desktop ? DesktopUser(playlist: playlist) : MobileUser(playlist: playlist),
-      loading: () => const Center(child: LoadingIndicatorM3E()),
+      loading: () => const Center(child: LoadingIndicator()),
       error: (_, __) => const Center(child: Text('Oops, something unexpected happened')),
     );
   }
@@ -54,7 +55,9 @@ class MobileUser extends StatelessWidget {
               itemBuilder: (context, index) {
                 final song = (playlist.likeList.playlist ?? [])[index];
                 return GestureDetector(
-                  child: Card(
+                  child: BackdropView(
+                    blur: true,
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
                       child: Row(
                         children: [
                           CachedImage(

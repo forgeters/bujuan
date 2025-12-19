@@ -1,8 +1,11 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:bujuan_music/pages/main/provider.dart';
 import 'package:bujuan_music_api/api/playlist/entity/playlist_detail_entity.dart';
 import 'package:bujuan_music_api/api/song/entity/song_detail_entity.dart';
 import 'package:bujuan_music_api/common/music_api.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -12,14 +15,20 @@ part 'provider.g.dart';
 Future<PlaylistData> playlistDetail(Ref ref, int id) async {
   var playlistDetailEntity = await BujuanMusicManager().playlistDetail(id: id);
   if (playlistDetailEntity == null) {
-    return PlaylistData(PlaylistDetailEntity(), []);
+    return PlaylistData(PlaylistDetailEntity(), [], Colors.transparent);
   }
+  var colorScheme = await ColorScheme.fromImageProvider(
+    provider: CachedNetworkImageProvider(
+      '${playlistDetailEntity.playlist?.coverImgUrl}?param=100y100',
+    ),
+  );
   var songDetail = await BujuanMusicManager().songDetail(
     ids: playlistDetailEntity.playlist!.trackIds!.map((e) => e.id ?? 0).toList(),
   );
 
   var medias = await compute(_buildPlaylistData, songDetail);
-  return PlaylistData(playlistDetailEntity, medias);
+  var primary = colorScheme.primary;
+  return PlaylistData(playlistDetailEntity, medias, primary);
 }
 
 List<MediaItem> _buildPlaylistData(SongDetailEntity? detail) {
@@ -41,6 +50,7 @@ List<MediaItem> _buildPlaylistData(SongDetailEntity? detail) {
 class PlaylistData {
   PlaylistDetailEntity detail;
   List<MediaItem> medias;
+  Color color;
 
-  PlaylistData(this.detail, this.medias);
+  PlaylistData(this.detail, this.medias, this.color);
 }

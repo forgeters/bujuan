@@ -8,7 +8,7 @@ part 'provider.g.dart';
 @riverpod
 class FloatBottomBarNotifier extends _$FloatBottomBarNotifier {
   @override
-  bool build() => getBoolAsync(AppConfig.isFloatBottom, defaultValue: false);
+  bool build() => getBoolAsync(AppConfig.isFloatBottom, defaultValue: true);
 
   void toggleTheme() {
     state = !state;
